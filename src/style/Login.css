@@ -1,0 +1,148 @@
+/* Fondo con imagen */
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: url('/5.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: "Arial", sans-serif;
+}
+
+/* Contenedor del login */
+.login-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+/* Tarjeta del login */
+.login-card {
+  width: 380px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  padding: 2.5em;
+  text-align: center;
+}
+
+/* Logo más grande y en blanco */
+.logo {
+  width: 180px;
+  filter: brightness(0) invert(1);
+  margin-bottom: 20px;
+}
+
+/* Contenedor del formulario */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Input con color gris */
+.form_control {
+  position: relative;
+  margin: 15px 0;
+}
+
+.input {
+  width: 100%;
+  margin: 0px;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  background: #3d464f;
+  color: white;
+  transition: 0.3s;
+  outline: none;
+}
+
+/* Label animado */
+.label {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #bbb;
+  transition: 0.3s;
+  font-size: 0.9em;
+}
+
+/* Mueve el label al hacer focus */
+.input:focus+.label,
+.input:valid+.label {
+  top: 5px;
+  font-size: 0.75em;
+  color: #ffffff;
+}
+
+/* Botón */
+button {
+  width: 100%;
+  padding: 12px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 1em;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #0056b3;
+}
+
+/* Mensaje de error */
+.error-message {
+  color: red;
+  font-size: 0.9em;
+  margin-top: 5px;
+}
+/* Estilos del campo de contraseña con icono de ojo */
+.password-container {
+  position: relative;
+}
+
+.password-input {
+  padding-right: 12px;
+  /* Espacio para el icono, reducido */
+}
+
+/* Botón del ojo dentro del input */
+.eye-button {
+  position: absolute;
+  right: 8px;
+  /* Más pegado a la derecha */
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: white;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  /* Más pequeño */
+  height: 20px;
+  /* Más pequeño */
+}
+
+.eye-button:hover {
+  opacity: 0.7;
+}
+
+/* Ajustar el tamaño del icono */
+.eye-button svg {
+  width: 16px;
+  /* Tamaño del icono reducido */
+  height: 16px;
+  /* Tamaño del icono reducido */
+}

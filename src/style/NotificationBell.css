@@ -1,0 +1,112 @@
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+}
+
+.notification-bell {
+  background: white;
+  border: none;
+  padding: 10px;
+  font-size: 24px;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.2s ease-in-out, background 0.3s;
+}
+
+.notification-bell.active {
+  background: blue;
+}
+
+.bell-icon {
+  transition: color 0.3s ease-in-out;
+}
+
+.bell-icon.blue-icon {
+  color: blue;
+}
+
+.bell-icon.white-icon {
+  color: white;
+}
+
+.notification-bell.new {
+  animation: shake 0.5s ease-in-out infinite alternate;
+}
+
+.notification-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 10px;
+  height: 10px;
+  background: red;
+  border-radius: 50%;
+}
+
+.notification-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 250px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-list {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.notification-item {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  transition: background 0.3s;
+  color: black;
+}
+
+.notification-item.unread {
+  background: #f0f8ff;
+}
+
+.notification-item:hover {
+  background: #e0e0e0;
+}
+
+.mark-read {
+  background: blue;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.clear-btn {
+  width: 100%;
+  background: red;
+  color: white;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+}
+
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(5px);
+  }
+}
