@@ -55,7 +55,7 @@ const Sidebar = () => {
             isExpanded={activeMenu === "clientes"}
             onToggle={() => toggleSubmenu("clientes")}
             items={[
-              { to: "/clientes/nuevo", text: "Nuevo Cliente" },
+              { to: "/Client", text: "Nuevo Cliente" },
               { to: "/clientes/lista", text: "Lista de Clientes" },
               { to: "/clientes/seguimiento", text: "Seguimiento" }
             ]}
@@ -68,7 +68,7 @@ const Sidebar = () => {
             isExpanded={activeMenu === "actividades"}
             onToggle={() => toggleSubmenu("actividades")}
             items={[
-              { to: "/actividades/nueva", text: "Nueva Actividad" },
+              { to: "/activity", text: "Nueva Actividad" },
               { to: "/actividades/calendario", text: "Calendario" },
               { to: "/actividades/reportes", text: "Reportes" }
             ]}
@@ -96,7 +96,7 @@ const Sidebar = () => {
 
       {/* Cerrar sesión */}
       <div className="logout">
-        <SidebarItem to="/logout" icon={<FaSignOutAlt />} text="Salir" className="text-red" />
+        <SidebarItem to="/login" icon={<FaSignOutAlt />} text="Salir" className="text-red" />
       </div>
     </div>
   );
