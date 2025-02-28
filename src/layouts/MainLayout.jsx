@@ -12,7 +12,7 @@ const MainLayout = ({ children }) => {
       </div>
 
       {/* Contenedor principal */}
-      <Container className="d-flex flex-column flex-grow-3">
+      <Container className="d-flex flex-column flex-grow-6">
         <NotificationBell />
         {children} {/* Aquí se insertarán las secciones específicas de cada página */}
       </Container>

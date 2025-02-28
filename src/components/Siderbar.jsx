@@ -2,13 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   FaUser, FaUsers, FaClipboardList, FaBriefcase,
-  FaHeadset, FaFileAlt, FaSignOutAlt, FaThLarge, FaChevronDown
+  FaHeadset, FaFileAlt, FaSignOutAlt, FaThLarge,
+  FaChevronDown, FaTimes
 } from "react-icons/fa";
 import "../style/Sidebar.css";
 
 const Sidebar = () => {
   const [activeMenu, setActiveMenu] = useState(null);
   const [userName, setUserName] = useState("Cargando...");
+  const [isOpen, setIsOpen] = useState(false); // Estado para mostrar/ocultar el sidebar
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -28,77 +30,91 @@ const Sidebar = () => {
   };
 
   return (
-    <div className="sidebar">
-      {/* Logo */}
-      <div className="sidebar-header">
-        <img src="logo-01.png" alt="Visitapp Logo" className="logo" />
+    <>
+      {/* Botón para abrir sidebar */}
+      {!isOpen && (
+        <button className="sidebar-toggle" onClick={() => setIsOpen(true)}>
+          <img src="/icono.png" alt="Abrir Sidebar" />
+        </button>
+      )}
+
+      <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
+        {/* Botón para cerrar sidebar */}
+        <button className="close-btn" onClick={() => setIsOpen(false)}>
+          <FaTimes />
+        </button>
+
+        {/* Logo */}
+        <div className="sidebar-header">
+          <img src="/logo-01.png" alt="Visitapp Logo" className="logo" />
+        </div>
+
+        {/* Usuario */}
+        <div className="user-info">
+          <Link to="/perfil" className="profile-link">
+            <FaUser className="user-icon" />
+            <span className="user-name">{userName}</span>
+          </Link>
+        </div>
+
+        {/* Menú */}
+        <nav className="menu">
+          <ul>
+            <SidebarItem to="/dashboard" icon={<FaThLarge />} text="Dashboard" />
+            <SidebarItem to="/empleados" icon={<FaUsers />} text="Empleados" />
+
+            {/* Clientes con submenú */}
+            <SidebarDropdown
+              title="Clientes"
+              icon={<FaClipboardList />}
+              isExpanded={activeMenu === "clientes"}
+              onToggle={() => toggleSubmenu("clientes")}
+              items={[
+                { to: "/Client", text: "Nuevo Cliente" },
+                { to: "/clientes/lista", text: "Lista de Clientes" },
+                { to: "/clientes/seguimiento", text: "Seguimiento" }
+              ]}
+            />
+
+            {/* Actividades con submenú */}
+            <SidebarDropdown
+              title="Actividades"
+              icon={<FaBriefcase />}
+              isExpanded={activeMenu === "actividades"}
+              onToggle={() => toggleSubmenu("actividades")}
+              items={[
+                { to: "/activity", text: "Nueva Actividad" },
+                { to: "/actividades/calendario", text: "Calendario" },
+                { to: "/actividades/reportes", text: "Reportes" }
+              ]}
+            />
+
+            {/* Soporte y Formación con submenú */}
+            <SidebarDropdown
+              title="Soporte y Formación"
+              icon={<FaHeadset />}
+              isExpanded={activeMenu === "soporte"}
+              onToggle={() => toggleSubmenu("soporte")}
+              items={[
+                { to: "/soporte/tickets", text: "Tickets" },
+                { to: "/soporte/cursos", text: "Cursos" },
+                { to: "/soporte/documentacion", text: "Documentación" }
+              ]}
+            />
+
+            <SidebarItem to="/documentos" icon={<FaFileAlt />} text="Documentos" />
+          </ul>
+        </nav>
+
+        {/* Línea separadora */}
+        <div className="separator"></div>
+
+        {/* Cerrar sesión */}
+        <div className="logout">
+          <SidebarItem to="/login" icon={<FaSignOutAlt />} text="Salir" className="text-red" />
+        </div>
       </div>
-
-      {/* Usuario */}
-      <div className="user-info">
-        <Link to="/perfil" className="profile-link">
-          <FaUser className="user-icon" />
-          <span className="user-name">{userName}</span>
-        </Link>
-      </div>
-
-      {/* Menú */}
-      <nav className="menu">
-        <ul>
-          <SidebarItem to="/dashboard" icon={<FaThLarge />} text="Dashboard" />
-          <SidebarItem to="/empleados" icon={<FaUsers />} text="Empleados" />
-
-          {/* Clientes con submenú */}
-          <SidebarDropdown
-            title="Clientes"
-            icon={<FaClipboardList />}
-            isExpanded={activeMenu === "clientes"}
-            onToggle={() => toggleSubmenu("clientes")}
-            items={[
-              { to: "/Client", text: "Nuevo Cliente" },
-              { to: "/clientes/lista", text: "Lista de Clientes" },
-              { to: "/clientes/seguimiento", text: "Seguimiento" }
-            ]}
-          />
-
-          {/* Actividades con submenú */}
-          <SidebarDropdown
-            title="Actividades"
-            icon={<FaBriefcase />}
-            isExpanded={activeMenu === "actividades"}
-            onToggle={() => toggleSubmenu("actividades")}
-            items={[
-              { to: "/activity", text: "Nueva Actividad" },
-              { to: "/actividades/calendario", text: "Calendario" },
-              { to: "/actividades/reportes", text: "Reportes" }
-            ]}
-          />
-
-          {/* Soporte y Formación con submenú */}
-          <SidebarDropdown
-            title="Soporte y Formación"
-            icon={<FaHeadset />}
-            isExpanded={activeMenu === "soporte"}
-            onToggle={() => toggleSubmenu("soporte")}
-            items={[
-              { to: "/soporte/tickets", text: "Tickets" },
-              { to: "/soporte/cursos", text: "Cursos" },
-              { to: "/soporte/documentacion", text: "Documentación" }
-            ]}
-          />
-
-          <SidebarItem to="/documentos" icon={<FaFileAlt />} text="Documentos" />
-        </ul>
-      </nav>
-
-      {/* Línea separadora */}
-      <div className="separator"></div>
-
-      {/* Cerrar sesión */}
-      <div className="logout">
-        <SidebarItem to="/login" icon={<FaSignOutAlt />} text="Salir" className="text-red" />
-      </div>
-    </div>
+    </>
   );
 };
 
