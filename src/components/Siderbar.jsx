@@ -9,7 +9,7 @@ import "../style/Sidebar.css";
 
 const Sidebar = () => {
   const [activeMenu, setActiveMenu] = useState(null);
-  const [userName, setUserName] = useState("Cargando...");
+  const [userName, setUserName] = useState("Alvizo");
   const [isOpen, setIsOpen] = useState(false); // Estado para mostrar/ocultar el sidebar
 
   useEffect(() => {
@@ -61,7 +61,7 @@ const Sidebar = () => {
         <nav className="menu">
           <ul>
             <SidebarItem to="/dashboard" icon={<FaThLarge />} text="Dashboard" />
-            <SidebarItem to="/empleados" icon={<FaUsers />} text="Empleados" />
+            <SidebarItem to="/empleado" icon={<FaUsers />} text="Empleados" />
 
             {/* Clientes con submenú */}
             <SidebarDropdown
