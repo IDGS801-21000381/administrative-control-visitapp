@@ -24,8 +24,8 @@ body {
 /* Card principal */
 .dashboard-card {
   background-color: #ffffff;
-  padding: 49px;
-  width: 94%;
+  padding: 44px;
+  width: 95.2%;
   border-radius: 10px;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   flex: 1;

@@ -5,7 +5,7 @@ import Dashboard from "./pages/Dasboard";
 import Employee from "./pages/Employee";
 import Client from "./pages/Client";
 import Profile from "./pages/Profile";
-import Soport from "./pages/Soport";
+import Support from "./pages/Support";
 import Document from "./pages/Document";
 
 const App = () => {
@@ -20,7 +20,7 @@ const App = () => {
         <Route path="/empleado" element={auth ? <Employee /> : <Navigate to="/login" />} />
         <Route path="/Cliente" element={auth ? <Client /> : <Navigate to="/login" />} />
         <Route path="/Perfil" element={auth ? <Profile /> : <Navigate to="/login" />} />
-        <Route path="/Soporte" element={auth ? <Soport /> : <Navigate to="/login" />} />
+        <Route path="/Soporte" element={auth ? <Support /> : <Navigate to="/login" />} />
        <Route path="/Docuemnto" element={auth ? <Document /> : <Navigate to="/login" />} />
 
       </Routes>

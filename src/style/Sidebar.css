@@ -11,6 +11,7 @@
   top: 0;
   overflow: hidden;
   transition: transform 0.3s ease-in-out;
+  z-index: 100;
 }
 
 /* Estado de Sidebar cerrado */
@@ -26,8 +27,8 @@
 /* Botón flotante para abrir el sidebar */
 .sidebar-toggle {
   position: fixed;
-  top: 20px;
-  left: 20px;
+  top: px;
+  left: 3px;
   background: white;
   border: 2px solid black;
   border-radius: 8px;
@@ -37,13 +38,12 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  z-index: 1000;
 }
 
 .sidebar-toggle img {
   width: 80%;
-  /* Aumentamos el tamaño de la imagen para que sea más visible */
   border-radius: 50%;
-  /* Hacemos la imagen redonda */
 }
 
 /* Botón de cerrar sidebar */
@@ -52,35 +52,26 @@
   top: 1px;
   right: 1px;
   background: none;
-  /* Sin fondo */
   border: 2px solid white;
-  /* Borde blanco */
   color: #ffffff;
-  /* Color de la "X" */
   font-size: 25px;
-  /* Tamaño de la "X" */
   width: 40px;
-  /* Tamaño del botón */
   height: 95px;
-  /* Tamaño del botón */
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
   z-index: 10;
   border-radius: 5px;
-  /* Bordes redondeados, si los quieres cuadrados elimina esta línea */
 }
 
 .close-btn:hover {
   background-color: transparent;
-  /* Sin fondo al pasar el ratón */
   color: red;
-  /* Color de la "X" se mantiene */
   border: 3px solid red;
-  border-radius: 15px ;
-  /* El borde se pone del mismo color que la "X" al pasar el ratón */
+  border-radius: 15px;
 }
+
 /* Header */
 .sidebar-header {
   background-color: #1565c0;
@@ -88,19 +79,19 @@
   padding: 20px;
   text-align: center;
   position: relative;
-  /* Para que el botón de cerrar esté encima */
 }
 
 .logo {
   width: 120px;
   margin-right: 10px;
   display: inline-block;
-  /* Asegura que el logo esté alineado */
 }
 
 /* Usuario */
 .user-info {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 15px;
   border-bottom: 1px solid #ddd;
 }
@@ -108,7 +99,6 @@
 .profile-link {
   display: flex;
   align-items: center;
-  justify-content: center;
   text-decoration: none;
   color: black;
 }
@@ -120,9 +110,124 @@
 
 .user-name {
   font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
 }
 
-/* Menú con scroll */
+/* Reducción del tamaño del botón de notificación */
+.notification-bell {
+  background: none;
+  border: none;
+  padding: 5px;
+  /* Se reduce el padding */
+  cursor: pointer;
+  position: relative;
+  margin-left: 40px;
+  width: 60px;
+  /* Se hace más pequeño */
+  height: 70px;
+  /* Se hace más compacto */
+}
+
+.bell-icon {
+  font-size: 30px;
+  /* Se reduce el tamaño del ícono */
+  color: #317eeb;
+  transition: color 0.3s ease-in-out;
+}
+
+.notification-bell:hover .bell-icon {
+  color: white;
+}
+
+.notification-bell.active .bell-icon {
+  color: white;
+}
+
+.notification-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: red;
+  border-radius: 50%;
+}
+
+/* Ajuste de la posición de notification-dropdown */
+.notification-dropdown {
+  position: absolute;
+  left: 260px;
+  /* Se coloca justo al lado del sidebar */
+  top: 50px;
+  /* Se ajusta la altura */
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 250px;
+  /* Se mantiene un tamaño adecuado */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  padding: 10px;
+}
+
+/* Ítems de notificaciones */
+.notification-item {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  transition: background 0.3s;
+  color: black;
+}
+
+.notification-item.unread {
+  background: #f0f8ff;
+}
+
+.notification-item:hover {
+  background: #e0e0e0;
+}
+
+/* Botón "Ver" */
+.mark-read {
+  background: #317eeb;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.mark-read:hover {
+  background: #1565c0;
+}
+
+/* Botón "Limpiar Bandeja" */
+.clear-btn {
+  width: 100%;
+  background: red;
+  color: white;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.clear-btn:hover {
+  background: darkred;
+}
+
+/* Menú */
 .menu ul {
   list-style: none;
   padding: 0;
@@ -149,8 +254,8 @@
 .menu-link:hover {
   background-color: #f5f5f5;
   transform: scale(1.05);
-  /* Agranda el ítem */
 }
+
 /* Submenús */
 .submenu {
   display: none;
@@ -161,21 +266,16 @@
   overflow: hidden;
   opacity: 0;
   border-left: 4px solid #1565c0;
-  /* Borde izquierdo para resaltar que es parte del menú */
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-  /* Sombra interna para dar un efecto de profundidad */
   border-radius: 8px;
-  /* Bordes redondeados */
 }
 
 /* Submenú expandido */
 .submenu.expanded {
   display: block;
   max-height: 500px;
-  /* Ajusta según el contenido */
   opacity: 1;
   box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2);
-  /* Sombra interna más intensa al expandirse */
 }
 
 /* Animación en los submenús */
@@ -201,7 +301,6 @@
   color: white;
   transform: scale(1.05);
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-  /* Sombra interna al pasar el ratón */
 }
 
 /* Flecha del submenú */
@@ -226,4 +325,15 @@
 .logout .menu-link {
   color: red;
   font-weight: bold;
+}
+
+/* Estilos para SweetAlert2 */
+.swal-confirm-button {
+  background-color: #317eeb !important;
+  color: white !important;
+}
+
+.swal-cancel-button {
+  background-color: #ddd !important;
+  color: black !important;
 }

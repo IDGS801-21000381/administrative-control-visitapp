@@ -28,7 +28,7 @@ const users = [
 const Employee = () => {
   return (
     <div className="dashboard-container_e">
-      <h2 className="dashboard-title_e">Colonos</h2>
+      <h2 className="dashboard-title_e">Empleado</h2>
       <div className="card-container_e">
         {users.map((user, index) => (
           <div key={index} className="card_e">

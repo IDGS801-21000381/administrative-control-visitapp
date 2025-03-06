@@ -1,7 +1,7 @@
 .notification-container {
   position: fixed;
-  top: 20px;
-  right: 20px;
+  top: 100px;
+  left: 20px;
 }
 
 .notification-bell {
@@ -15,7 +15,7 @@
 }
 
 .notification-bell.active {
-  background: blue;
+  background: #317eeb;
 }
 
 .bell-icon {
@@ -23,7 +23,7 @@
 }
 
 .bell-icon.blue-icon {
-  color: blue;
+  color: #317eeb;
 }
 
 .bell-icon.white-icon {
@@ -81,7 +81,7 @@
 }
 
 .mark-read {
-  background: blue;
+  background: #317eeb;
   color: white;
   border: none;
   padding: 5px 10px;

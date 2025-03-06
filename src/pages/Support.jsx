@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Soport = () => {
+const Support = () => {
   return (
     <div>
      Hola
@@ -8,4 +8,4 @@ const Soport = () => {
   )
 }
 
-export default Soport
+export default Support
