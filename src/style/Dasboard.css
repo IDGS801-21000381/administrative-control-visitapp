@@ -1,182 +1,140 @@
-/* Estilos generales */
-body {
-  background-color: #f4f7fc;
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding: 0;
-  height: 100vh;
-  /* Ocupa toda la altura de la pantalla */
-  display: flex;
-  flex-direction: column;
-}
-
-/* Contenedor principal */
 .dashboard-container {
-  flex: 1;
-  /* Ocupa todo el espacio disponible */
-  width: 100%;
-  display: flex;
-  flex-direction: column;
+  padding: 20px;
+  background-color: #f8f9fa;
+  /* Fondo gris claro para el contenedor principal */
+  min-height: 100vh;
+  /* Asegura que ocupe toda la altura de la página */
   overflow: hidden;
-  /* Evita el scroll en el contenedor principal */
+  /* Evita el desbordamiento del contenedor principal */
 }
 
-/* Card principal */
-.dashboard-card {
-  background-color: #ffffff;
-  padding: 44px;
-  width: 95.2%;
-  border-radius: 10px;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-  flex: 1;
-  /* Ocupa todo el espacio disponible */
-  display: flex;
-  flex-direction: column;
+.card-contenedor {
+  background-color: white;
+  /* Fondo blanco para el card */
+  border-radius: 8px;
+  /* Bordes redondeados */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Sombra para resaltar el card */
+  padding: 20px;
+  /* Padding interno */
+  margin: 0 auto;
+  /* Centrar el card */
+  max-width: 1200px;
+  /* Ancho máximo del card */
+  height: 80vh;
+  /* Altura del card */
   overflow-y: auto;
-  /* Scroll vertical si es necesario */
-  max-height: 90vh;
-  /* Un poco más grande, pero sin exceder la pantalla */
+  /* Scroll vertical */
 }
 
-/* Título principal */
 .dashboard-title {
-  font-size: 24px;
-  font-weight: bold;
   text-align: center;
-  background-color: #1c3faa;
-  color: white;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+  /* Centrar el título */
+  font-size: 2rem;
+  /* Tamaño del título */
+  font-weight: bold;
+  /* Negrita */
+  color: #317eeb;
+  /* Color azul para resaltar */
   margin-bottom: 20px;
-}
-
-/* Filtros */
-.filters-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 15px;
-  background-color: #ffffff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
-  margin-bottom: 20px;
-}
-
-.input-search {
-  border: 1px solid #1c3faa;
-  border-radius: 5px;
-  padding: 10px;
-  background-color: black;
-  font-size: 14px;
-  flex: 1;
-}
-
-.btn-today,
-.btn-week {
-  background-color: black;
-  color: white;
-  border-radius: 5px;
-  font-size: 14px;
-  padding: 10px 15px;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-search {
-  background-color: #1c3faa;
-  color: white;
-  border-radius: 5px;
-  font-size: 14px;
-  padding: 10px 15px;
-  border: none;
-  cursor: pointer;
-}
-
-/* Secciones de gráficos */
-.chart-card {
-  background-color: #e3eafc;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
-  margin-bottom: 20px;
-  height: 300px;
-  /* Altura fija para las tarjetas de gráficos */
-}
-
-/* Ajustes de responsividad */
-@media (max-width: 768px) {
-  .filters-container {
-    flex-direction: column;
-  }
-
-  .input-search,
-  .btn-today,
-  .btn-week,
-  .btn-search {
-    width: 100%;
-    margin-bottom: 10px;
-  }
-}
-.filters-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 15px;
-  background-color: #ffffff;
-  padding: 15px;
-  border-radius: 8px;
-  box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.15);
-  margin-bottom: 20px;
-}
-
-.input-search {
-  border: 1px solid #1c3faa;
-  border-radius: 5px;
-  padding: 10px;
-  background-color: black;
-  font-size: 14px;
-  flex: 1;
-}
-
-.btn-today,
-.btn-week {
-  background-color: black;
-  color: white;
-  border-radius: 5px;
-  font-size: 14px;
-  padding: 10px 15px;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-search {
-  background-color: #1c3faa;
-  color: white;
-  border-radius: 5px;
-  font-size: 14px;
-  padding: 10px 15px;
-  border: none;
-  cursor: pointer;
+  /* Espacio debajo del título */
 }
 
 .section-title {
-  font-size: 20px;
+  text-align: center;
+  /* Centrar los títulos de sección */
+  font-size: 1.5rem;
+  /* Tamaño del título de sección */
   font-weight: bold;
-  margin-bottom: 15px;
+  /* Negrita */
+  color: #333;
+  /* Color oscuro para los títulos de sección */
+  margin-top: 20px;
+  /* Espacio arriba del título */
+  margin-bottom: 20px;
+  /* Espacio debajo del título */
 }
 
-@media (max-width: 768px) {
-  .filters-container {
-    flex-direction: column;
-  }
-
-  .input-search,
-  .btn-today,
-  .btn-week,
-  .btn-search {
-    width: 100%;
-    margin-bottom: 10px;
-  }
+.filters-container {
+  display: flex;
+  flex-direction: column;
+  /* Colocar los elementos en columna */
+  gap: 10px;
+  /* Espacio entre los elementos */
+  margin-bottom: 20px;
 }
+
+.input-search {
+  margin: 5px;
+  flex: 1;
+  /* Permitir que los inputs crezcan */
+  min-width: 150px;
+  /* Ancho mínimo para los inputs */
+}
+
+.btn-today,
+.btn-week {
+  margin-top: 10px;
+  background-color: #6c757d;
+  /* Color gris para los botones de hoy y semana */
+  border: none;
+  /* Sin bordes */
+  padding: 8px 16px;
+  /* Tamaño más pequeño */
+  font-size: 0.9rem;
+  /* Tamaño de fuente más pequeño */
+}
+
+.btn-search {
+  margin-top: 10px;
+  background-color: #163A6B;
+  /* Color azul oscuro para el botón de buscar */
+  border: none;
+  /* Sin bordes */
+  padding: 8px 16px;
+  /* Tamaño más pequeño */
+  font-size: 0.9rem;
+  /* Tamaño de fuente más pequeño */
+}
+
+.btn-today:hover,
+.btn-week:hover {
+  background-color: #5a6268;
+  /* Color gris oscuro al pasar el mouse */
+}
+
+.btn-search:hover {
+  background-color: #1E4A7A;
+  /* Color azul más claro al pasar el mouse */
+}
+
+.btn-search:active {
+  background-color: #0D2A4A;
+  /* Color azul más oscuro al hacer clic */
+}
+
+.charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  /* Centrar los gráficos */
+}
+
+.chart-container {
+  width: 45%;
+  min-width: 300px;
+  flex-grow: 1;
+  /* Permitir que los gráficos crezcan para ocupar el espacio disponible */
+}
+
+.chart-card {
+  padding: 20px;
+  background-color: white;
+  /* Fondo blanco para los cards de gráficos */
+  border-radius: 8px;
+  /* Bordes redondeados */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  /* Sombra para resaltar los cards */
+}
+

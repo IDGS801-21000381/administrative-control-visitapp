@@ -1,12 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Chart, registerables } from 'chart.js';
-import { Container, Row, Col, Card, Button, Form } from 'react-bootstrap';
+import { Container, Card, Button, Form } from 'react-bootstrap';
 import MainLayout from '../layouts/MainLayout';
 import '../style/Dasboard.css'; // Asegúrate de que el archivo CSS esté correctamente vinculado
 
 Chart.register(...registerables);
 
-const Dashboard = () => {
+const Dasboard = () => {
   const chartRefs = {
     bar: useRef(null),
     pie: useRef(null),
@@ -46,32 +46,44 @@ const Dashboard = () => {
   useEffect(() => {
     createChart(chartRefs.bar, 'bar', {
       labels: ['Arras', 'Nymphe', 'Arboledas', 'Vistahermosa', 'Adamant'],
-      datasets: [{ label: 'Residencial con más casos', data: [12, 19, 3, 5, 2], backgroundColor: ['#4c72b0', '#5a9bd4', '#8da0cb', '#b3cde3', '#ccebc5'] }],
+      datasets: [{ label: 'Residencial con más casos', data: [12, 19, 3, 5, 2], backgroundColor: ['#317eeb', '#4CAF50', '#FF9800', '#E91E63', '#9C27B0'] }],
     }, 'bar');
 
     createChart(chartRefs.pie, 'pie', {
       labels: ['Administrador', 'Zendesk', 'Personal', 'Otro'],
-      datasets: [{ label: 'Tickets Resueltos', data: [30, 20, 25, 25], backgroundColor: ['#4c72b0', '#5a9bd4', '#8da0cb', '#b3cde3'] }],
+      datasets: [{ label: 'Tickets Resueltos', data: [30, 20, 25, 25], backgroundColor: ['#317eeb', '#FFC107', '#3F51B5', '#009688'] }],
     }, 'pie');
 
     createChart(chartRefs.sprint, 'doughnut', {
       labels: ['Completado', 'Pendiente', 'Trabajando', 'Asignada'],
-      datasets: [{ label: 'Sprint Desarrollo', data: [50, 20, 20, 10], backgroundColor: ['#4c72b0', '#5a9bd4', '#8da0cb', '#b3cde3'] }],
+      datasets: [{ label: 'Sprint Desarrollo', data: [50, 20, 20, 10], backgroundColor: ['#317eeb', '#FF5722', '#607D8B', '#CDDC39'] }],
     }, 'sprint');
 
     createChart(chartRefs.supportSprint, 'doughnut', {
       labels: ['Completado', 'Pendiente', 'Trabajando', 'Asignada'],
-      datasets: [{ label: 'Sprint Soporte', data: [60, 15, 15, 10], backgroundColor: ['#4c72b0', '#5a9bd4', '#8da0cb', '#b3cde3'] }],
+      datasets: [{
+        label: 'Sprint Soporte',
+        data: [60, 15, 15, 10],
+        backgroundColor: ['#317eeb', '#FF5722', '#4CAF50', '#FFC107']
+      }],
     }, 'supportSprint');
 
     createChart(chartRefs.employeesSupport, 'bar', {
       labels: ['Rodolfo', 'Florian', 'Angel', 'Alexis', 'Cris'],
-      datasets: [{ label: 'Actividades Completadas De Soporte', data: [10, 15, 12, 18, 20], backgroundColor: ['#4c72b0', '#5a9bd4', '#8da0cb', '#b3cde3'] }],
+      datasets: [{
+        label: 'Actividades Completadas De Soporte',
+        data: [10, 15, 12, 18, 20],
+        backgroundColor: ['#E91E63', '#9C27B0', '#3F51B5', '#FF9800', '#009688']
+      }],
     }, 'employeesSupport');
 
     createChart(chartRefs.employeesDev, 'bar', {
       labels: ['Hamurabi', 'Carlos', 'Antonio'],
-      datasets: [{ label: 'Actividades Completadas De Desarrollo', data: [8, 9, 14], backgroundColor: ['#4c72b0', '#5a9bd4', '#8da0cb'] }],
+      datasets: [{
+        label: 'Actividades Completadas De Desarrollo',
+        data: [8, 9, 14],
+        backgroundColor: ['#317eeb', '#FF5722', '#4CAF50']
+      }],
     }, 'employeesDev');
 
     return () => {
@@ -82,7 +94,7 @@ const Dashboard = () => {
   return (
     <MainLayout>
       <Container fluid className="dashboard-container">
-        <Card className="dashboard-card">
+        <Card className="card-contenedor">
           <h3 className="dashboard-title">Dashboard</h3>
           {/* Filtros */}
           <div className="filters-container">
@@ -123,54 +135,54 @@ const Dashboard = () => {
               <option>2026</option>
               <option>2027</option>
             </Form.Select>
-            <Button variant="dark" className="btn-today">Hoy</Button>
-            <Button variant="secondary" className="btn-week">Semana</Button>
+            <Button variant="secundary" className="btn-today">Hoy</Button>
+            <Button variant="primary" className="btn-week">Semana</Button>
             <Button variant="primary" className="btn-search">Buscar</Button>
           </div>
           {/* Sección de gráficos */}
-          <h4 className="section-title" style={{ color: 'black' }}>Clientes</h4>
-          <Row>
-            <Col md={6}>
+          <h4 className="section-title">Clientes</h4>
+          <div className="charts-container">
+            <div className="chart-container">
               <Card className="chart-card">
                 <canvas ref={chartRefs.bar} />
               </Card>
-            </Col>
-            <Col md={6}>
+            </div>
+            <div className="chart-container">
               <Card className="chart-card">
                 <canvas ref={chartRefs.pie} />
               </Card>
-            </Col>
-          </Row>
-          <h4 className="section-title" style={{ color: 'black' }}>Avances de Actividades</h4>
-          <Row>
-            <Col md={6}>
+            </div>
+          </div>
+          <h4 className="section-title">Avances de Actividades</h4>
+          <div className="charts-container">
+            <div className="chart-container">
               <Card className="chart-card">
                 <canvas ref={chartRefs.sprint} />
               </Card>
-            </Col>
-            <Col md={6}>
+            </div>
+            <div className="chart-container">
               <Card className="chart-card">
                 <canvas ref={chartRefs.supportSprint} />
               </Card>
-            </Col>
-          </Row>
-          <h4 className="section-title" style={{ color: 'black' }}>Empleados</h4>
-          <Row>
-            <Col md={6}>
+            </div>
+          </div>
+          <h4 className="section-title">Empleados</h4>
+          <div className="charts-container">
+            <div className="chart-container">
               <Card className="chart-card">
                 <canvas ref={chartRefs.employeesSupport} />
               </Card>
-            </Col>
-            <Col md={6}>
+            </div>
+            <div className="chart-container">
               <Card className="chart-card">
                 <canvas ref={chartRefs.employeesDev} />
               </Card>
-            </Col>
-          </Row>
+            </div>
+          </div>
         </Card>
       </Container>
     </MainLayout>
   );
 };
 
-export default Dashboard;
+export default Dasboard;
