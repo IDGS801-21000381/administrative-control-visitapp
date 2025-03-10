@@ -1,116 +1,123 @@
-.dashboard-container {
-  padding: 20px;
-  background-color: #f8f9fa;
-  /* Fondo gris claro para el contenedor principal */
-  min-height: 100vh;
-  /* Asegura que ocupe toda la altura de la página */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
   overflow: hidden;
-  /* Evita el desbordamiento del contenedor principal */
+  /* Evita el scroll innecesario en la página */
+}
+
+.dashboard-container {
+  background-color: blue;
+  width: 100vw;
+  /* Asegura que ocupe todo el ancho de la pantalla */
+  height: 90vh;
+  /* Asegura que ocupe todo el alto de la pantalla */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .card-contenedor {
   background-color: white;
-  /* Fondo blanco para el card */
   border-radius: 8px;
-  /* Bordes redondeados */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  /* Sombra para resaltar el card */
-  padding: 20px;
-  /* Padding interno */
-  margin: 0 auto;
-  /* Centrar el card */
-  max-width: 1200px;
-  /* Ancho máximo del card */
-  height: 80vh;
-  /* Altura del card */
+  width: 100vw;
+  /* Hace que ocupe casi todo el ancho de la pantalla */
+  max-width: 1600px;
+  /* Máximo para evitar que sea demasiado ancho */
+  height: 100vh;
+  /* Un poco menos que la altura total para evitar desbordes */
   overflow-y: auto;
-  /* Scroll vertical */
 }
-
 .dashboard-title {
   text-align: center;
-  /* Centrar el título */
   font-size: 2rem;
-  /* Tamaño del título */
   font-weight: bold;
-  /* Negrita */
   color: #317eeb;
-  /* Color azul para resaltar */
   margin-bottom: 20px;
-  /* Espacio debajo del título */
+  padding: 0 20px;
+  /* Padding solo horizontal para el título */
 }
 
 .section-title {
   text-align: center;
-  /* Centrar los títulos de sección */
   font-size: 1.5rem;
-  /* Tamaño del título de sección */
   font-weight: bold;
-  /* Negrita */
   color: #333;
-  /* Color oscuro para los títulos de sección */
   margin-top: 20px;
-  /* Espacio arriba del título */
   margin-bottom: 20px;
-  /* Espacio debajo del título */
+  padding: 0 20px;
+  /* Padding solo horizontal para los títulos de sección */
 }
+
 
 .filters-container {
   display: flex;
-  flex-direction: column;
-  /* Colocar los elementos en columna */
-  gap: 10px;
-  /* Espacio entre los elementos */
-  margin-bottom: 20px;
+  flex-wrap: nowrap;
+  /* Mantiene todo en una línea */
+  gap: 5px;
+  /* Reduce el espacio entre elementos */
+  margin-bottom: 15px;
+  padding: 0 10px;
+  align-items: center;
+  /* Alinea verticalmente */
+  justify-content: center;
+  /* Centra los elementos */
+  max-width: 100%;
+  overflow-x: auto;
+  /* Permite desplazamiento horizontal si es necesario */
 }
 
-.input-search {
-  margin: 5px;
-  flex: 1;
-  /* Permitir que los inputs crezcan */
-  min-width: 150px;
-  /* Ancho mínimo para los inputs */
+.input-search,
+.select-filter {
+  flex: 0 1 auto;
+  /* Evita que crezcan demasiado */
+  min-width: 100px;
+  /* Reduce el ancho mínimo */
+  height: 28px;
+  /* Ajusta la altura */
+  font-size: 0.8rem;
+  /* Texto más pequeño */
+  padding: 2px 5px;
+}
+
+.btn-today,
+.btn-week,
+.btn-search {
+  padding: 3px 8px;
+  /* Reduce el padding */
+  font-size: 0.75rem;
+  /* Tamaño de fuente más pequeño */
+  height: 28px;
+  /* Misma altura que inputs */
+  width: auto;
+  /* Evita que los botones se expandan */
+  border: none;
+  white-space: nowrap;
+  /* Evita que se rompan en varias líneas */
 }
 
 .btn-today,
 .btn-week {
-  margin-top: 10px;
   background-color: #6c757d;
-  /* Color gris para los botones de hoy y semana */
-  border: none;
-  /* Sin bordes */
-  padding: 8px 16px;
-  /* Tamaño más pequeño */
-  font-size: 0.9rem;
-  /* Tamaño de fuente más pequeño */
 }
 
 .btn-search {
-  margin-top: 10px;
   background-color: #163A6B;
-  /* Color azul oscuro para el botón de buscar */
-  border: none;
-  /* Sin bordes */
-  padding: 8px 16px;
-  /* Tamaño más pequeño */
-  font-size: 0.9rem;
-  /* Tamaño de fuente más pequeño */
 }
 
 .btn-today:hover,
 .btn-week:hover {
   background-color: #5a6268;
-  /* Color gris oscuro al pasar el mouse */
 }
 
 .btn-search:hover {
   background-color: #1E4A7A;
-  /* Color azul más claro al pasar el mouse */
 }
 
 .btn-search:active {
   background-color: #0D2A4A;
-  /* Color azul más oscuro al hacer clic */
 }
 
 .charts-container {
@@ -118,23 +125,18 @@
   flex-wrap: wrap;
   gap: 20px;
   justify-content: center;
-  /* Centrar los gráficos */
+  padding: 0 20px;
 }
 
 .chart-container {
   width: 45%;
   min-width: 300px;
   flex-grow: 1;
-  /* Permitir que los gráficos crezcan para ocupar el espacio disponible */
 }
 
 .chart-card {
   padding: 20px;
   background-color: white;
-  /* Fondo blanco para los cards de gráficos */
   border-radius: 8px;
-  /* Bordes redondeados */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  /* Sombra para resaltar los cards */
 }
-

@@ -14,7 +14,7 @@ const Login = ({ setAuth }) => {
   // Usuarios permitidos
   const users = {
     "angel.admin": "admin",
-    "alvizo": "desarrollo",
+    "1": "desarrollo",
     "juarez": "soporte",
   };
 
@@ -27,7 +27,7 @@ const Login = ({ setAuth }) => {
       return;
     }
 
-    if (users[username] && password === "123456") {
+    if (users[username] && password === "1") {
       setError("");
       Swal.fire({
         title: `¡Bienvenido, ${users[username]}! `,
