@@ -79,17 +79,23 @@ const Sidebar = () => {
     });
   };
 
+  const handleCloseSidebar = () => {
+    setIsOpen(false);
+    setIsNotificationOpen(false); // Cerrar notificaciones al cerrar el sidebar
+  };
+
   return (
     <>
       {!isOpen && (
         <button className="sidebar-toggle" onClick={() => setIsOpen(true)}>
           <img src="/icono.png" alt="Abrir Sidebar" />
+          {hasNewNotifications && <span className={`notification-dot ${!hasNewNotifications ? "hidden" : ""}`}></span>}
         </button>
       )}
 
       {/* Sidebar */}
       <div className={`sidebar ${isOpen ? "open" : "closed"}`}>
-        <button className="close-btn" onClick={() => setIsOpen(false)}>
+        <button className="close-btn" onClick={handleCloseSidebar}>
           <FaTimes />
         </button>
 
@@ -109,7 +115,7 @@ const Sidebar = () => {
             onClick={toggleNotificationDropdown}
           >
             <FaBell className="bell-icon" />
-            {hasNewNotifications && <span className="notification-dot"></span>}
+            {hasNewNotifications && <span className={`notification-dot ${!hasNewNotifications ? "hidden" : ""}`}></span>}
           </button>
         </div>
 

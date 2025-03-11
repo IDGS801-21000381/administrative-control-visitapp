@@ -11,7 +11,8 @@
   top: 0;
   overflow: hidden;
   transition: transform 0.3s ease-in-out;
-  z-index: 100;
+  z-index: 1000;
+  /* Aumenta el z-index para asegurar que esté arriba */
 }
 
 /* Estado de Sidebar cerrado */
@@ -27,8 +28,10 @@
 /* Botón flotante para abrir el sidebar */
 .sidebar-toggle {
   position: fixed;
-  top: px;
-  left: 3px;
+  top: 10px;
+  /* Ajusta la posición vertical */
+  left: 10px;
+  /* Ajusta la posición horizontal */
   background: white;
   border: 2px solid black;
   border-radius: 8px;
@@ -38,26 +41,46 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  z-index: 1000;
+  z-index: 1001;
+  /* Asegúrate de que esté arriba del sidebar */
 }
 
 .sidebar-toggle img {
-  
   width: 100%;
   border-radius: 50%;
+}
+
+/* Estilo para el punto rojo de notificaciones en el botón de toggle */
+.sidebar-toggle .notification-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  background: red;
+  border-radius: 50%;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Ocultar el punto rojo si no hay notificaciones no leídas */
+.sidebar-toggle .notification-dot.hidden {
+  opacity: 0;
 }
 
 /* Botón de cerrar sidebar */
 .close-btn {
   position: absolute;
-  top: 1px;
-  right: 1px;
+  top: 10px;
+  /* Ajusta la posición vertical */
+  right: 10px;
+  /* Ajusta la posición horizontal */
   background: none;
   border: 2px solid white;
   color: #ffffff;
   font-size: 25px;
   width: 40px;
-  height: 95px;
+  height: 40px;
+  /* Ajusta la altura */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -123,19 +146,15 @@
   background: none;
   border: none;
   padding: 5px;
-  /* Se reduce el padding */
   cursor: pointer;
   position: relative;
   margin-left: 40px;
   width: 60px;
-  /* Se hace más pequeño */
   height: 70px;
-  /* Se hace más compacto */
 }
 
 .bell-icon {
   font-size: 30px;
-  /* Se reduce el tamaño del ícono */
   color: #317eeb;
   transition: color 0.3s ease-in-out;
 }
@@ -148,6 +167,7 @@
   color: white;
 }
 
+/* Estilo para el punto rojo de notificaciones */
 .notification-dot {
   position: absolute;
   top: -2px;
@@ -156,24 +176,28 @@
   height: 8px;
   background: red;
   border-radius: 50%;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Ocultar el punto rojo si no hay notificaciones no leídas */
+.notification-dot.hidden {
+  opacity: 0;
 }
 
 /* Ajuste de la posición de notification-dropdown */
 .notification-dropdown {
   position: absolute;
   left: 260px;
-  /* Se coloca justo al lado del sidebar */
   top: 50px;
-  /* Se ajusta la altura */
   background: white;
   border: 1px solid #ddd;
   border-radius: 5px;
   width: 250px;
-  /* Se mantiene un tamaño adecuado */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   max-height: 400px;
   overflow-y: auto;
-  z-index: 1000;
+  z-index: 1002;
+  /* Asegúrate de que esté arriba del sidebar y del botón de toggle */
   padding: 10px;
 }
 
@@ -226,6 +250,14 @@
 
 .clear-btn:hover {
   background: darkred;
+}
+
+/* Estilo para el mensaje "No hay notificaciones" */
+.no-notifications {
+  text-align: center;
+  color: #888;
+  padding: 10px;
+  font-size: 14px;
 }
 
 /* Menú */

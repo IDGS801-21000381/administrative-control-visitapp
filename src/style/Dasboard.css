@@ -8,10 +8,10 @@ body {
 }
 
 .dashboard-container {
-  background-color: blue;
+  background-color: #163A6B;
   width: 100vw;
   /* Asegura que ocupe todo el ancho de la pantalla */
-  height: 90vh;
+  height: 99vh;
   /* Asegura que ocupe todo el alto de la pantalla */
   display: flex;
   justify-content: center;

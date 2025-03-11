@@ -16,7 +16,9 @@ const Login = ({ setAuth }) => {
     "angel.admin": "admin",
     "1": "desarrollo",
     "juarez": "soporte",
+    "alvizo":"desarrollo"
   };
+
 
   // Función de login
   const handleLogin = (e) => {
@@ -27,7 +29,7 @@ const Login = ({ setAuth }) => {
       return;
     }
 
-    if (users[username] && password === "1") {
+    if (users[username] && password == "1" ) {
       setError("");
       Swal.fire({
         title: `¡Bienvenido, ${users[username]}! `,
