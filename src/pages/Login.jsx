@@ -29,7 +29,7 @@ const Login = ({ setAuth }) => {
       return;
     }
 
-    if (users[username] && password == "1" ) {
+    if (users[username] && password == "123456" ) {
       setError("");
       Swal.fire({
         title: `¡Bienvenido, ${users[username]}! `,
