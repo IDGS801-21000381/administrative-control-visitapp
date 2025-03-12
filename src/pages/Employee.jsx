@@ -146,7 +146,7 @@ const Employee = () => {
               </Col>
               <Col md={2} className="d-flex justify-content-end">
                 <Button variant="primary" className="btn-new" onClick={handleNewEmployee}>
-                   <HiMiniUserPlus style={{ padding: "2px" }} />  Nuevo
+                   <HiMiniUserPlus style={{ pa: "2px" }} />  Nuevo
                 </Button>
               </Col>
             </Row>
