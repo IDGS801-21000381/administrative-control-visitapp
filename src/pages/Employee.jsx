@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import "../style/Employee.css";
+import { HiMiniUserPlus } from "react-icons/hi2";
 import { FaEdit, FaTrash, FaCheck, FaSearch, FaPlus, FaEye } from "react-icons/fa";
 import { Container, Form, Button, Row, Col, Card, Badge } from "react-bootstrap";
 import MainLayout from "../layouts/MainLayout";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
-const users = [
+const initialUsers = [
   {
     id: 1,
     name: "Florian Lizet Mata ",
@@ -28,10 +30,10 @@ const users = [
     phone: "555-5678",
     schedule: "Medio Tiempo",
   },
-   {
+  {
     id: 3,
-    name: "ANgel Eduardo Juarez Alvizo",
-    username: "angeljuarez",
+    name: "Angel Eduardo Juarez Alvizo",
+    username: "angelJuarez",
     role: "Desarrollo",
     status: "Activo",
     photo: "https://static.vecteezy.com/system/resources/previews/008/844/895/non_2x/user-icon-design-free-png.png",
@@ -50,19 +52,21 @@ const users = [
     phone: "555-5678",
     schedule: "Medio Tiempo",
   },
-  
 ];
 
 const Employee = () => {
+  const [users, setUsers] = useState(initialUsers); // Almacenar usuarios en el estado
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
+  const [roleFilter, setRoleFilter] = useState("Todos");
   const navigate = useNavigate();
 
   const filteredUsers = users.filter(
     (user) =>
       (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.role.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (statusFilter === "Todos" || user.status === statusFilter)
+      (statusFilter === "Todos" || user.status === statusFilter) &&
+      (roleFilter === "Todos" || user.role === roleFilter)
   );
 
   const handleSearchChange = (event) => {
@@ -71,6 +75,10 @@ const Employee = () => {
 
   const handleStatusChange = (event) => {
     setStatusFilter(event.target.value);
+  };
+
+  const handleRoleChange = (event) => {
+    setRoleFilter(event.target.value);
   };
 
   const handleNewEmployee = () => {
@@ -95,8 +103,7 @@ const Employee = () => {
     const updatedUsers = users.map((user) =>
       user.id === id ? { ...user, status: user.status === "Activo" ? "Inactivo" : "Activo" } : user
     );
-    // Aquí puedes actualizar el estado o el localStorage
-    console.log(updatedUsers);
+    setUsers(updatedUsers); // Actualizar el estado con los usuarios modificados
   };
 
   const handleEditUser = (id) => {
@@ -111,33 +118,35 @@ const Employee = () => {
             <h2 className="dashboard-title_e">Empleados</h2>
 
             {/* Barra de búsqueda y filtros */}
-            <Row className="mb-3">
-              <Col md={6}>
-                <Form.Group controlId="formSearch">
-                  <Form.Control
-                    type="text"
-                    placeholder="Buscar por nombre "
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    className="search-input"
-                  />
-                     <Form.Select value={statusFilter} onChange={handleStatusChange}>
-                  <option value="Rol">Todos</option>
+            <Row className="mb-3 align-items-center">
+              <Col md={4}>
+                <Form.Control
+                  type="text"
+                  placeholder="Buscar por nombre o rol"
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  className="input-search"
+                />
+              </Col>
+              <Col md={3}>
+                <Form.Select value={roleFilter} onChange={handleRoleChange} className="select-filter">
+                  <option value="Todos">Todos los roles</option>
                   <option value="Admin">Admin</option>
-                    <option value="Desarrollo">Desarrollo</option>
-                    <option value="Soporte">Soporte</option>
+                  <option value="Desarrollo">Desarrollo</option>
+                  <option value="Soporte">Soporte</option>
                   <option value="Ventas">Ventas</option>
-                  </Form.Select>
-                  <Form.Select value={statusFilter} onChange={handleStatusChange}>
-                  <option value="Estatus">Todos</option>
+                </Form.Select>
+              </Col>
+              <Col md={3}>
+                <Form.Select value={statusFilter} onChange={handleStatusChange} className="select-filter">
+                  <option value="Todos">Todos los estatus</option>
                   <option value="Activo">Activos</option>
                   <option value="Inactivo">Inactivos</option>
-                  </Form.Select>
-                </Form.Group>
+                </Form.Select>
               </Col>
-              <Col md={3} className="d-flex justify-content-end">
-                <Button variant="primary" onClick={handleNewEmployee}>
-                  <FaPlus /> Nuevo
+              <Col md={2} className="d-flex justify-content-end">
+                <Button variant="primary" className="btn-new" onClick={handleNewEmployee}>
+                   <HiMiniUserPlus style={{ padding: "2px" }} />  Nuevo
                 </Button>
               </Col>
             </Row>
@@ -159,6 +168,7 @@ const Employee = () => {
                       <Badge bg={user.status === "Activo" ? "success" : "danger"}>
                         {user.status}
                       </Badge>
+                      <p className="card-text_e"><strong>Horario:</strong> {user.schedule}</p>
                     </div>
                     <div className="card-actions_e">
                       <Button variant="info" onClick={() => handleViewDetails(user)}>

@@ -1,3 +1,4 @@
+/* Estilos personalizados */
 .page-container {
   background-color: #163A6B;
   width: 100vw;
@@ -34,11 +35,29 @@
   margin-bottom: 15px;
   transition: transform 0.2s;
   background-color: white;
-  /* Fondo blanco para las cards */
+  position: relative;
 }
 
 .card_e:hover {
   transform: scale(1.05);
+}
+
+.card_e::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 10px;
+  border-radius: 10px 10px 0 0;
+}
+
+.card_e.active::before {
+  background-color: blue;
+}
+
+.card_e.inactive::before {
+  background-color: red;
 }
 
 .card-body_e {
@@ -46,26 +65,28 @@
 }
 
 .card-img_e {
-  width: 80px;
-  height: 80px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
   border-radius: 50%;
   border: 2px solid #ccc;
+  margin: 0 auto;
+  display: block;
 }
 
 .card-title_e {
   font-size: 1.5rem;
   font-weight: bold;
   color: black;
-  /* Texto negro */
   margin-top: 10px;
+  text-align: center;
 }
 
 .card-text_e {
   font-size: 14px;
   margin-bottom: 5px;
   color: black;
-  /* Texto negro */
+  text-align: center;
 }
 
 .card-actions_e {
@@ -82,9 +103,60 @@
   gap: 15px;
 }
 
-.search-input {
+.search-input,
+.form-select {
+  background-color: white;
+  /* Fondo blanco */
+  color: black;
+  /* Texto negro */
+  width: auto;
+  /* Tamaño más pequeño */
+  padding: 5px 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 0.875rem;
+}
+
+/* Alineación de los filtros a la derecha y en fila horizontal */
+.row.mb-3.align-items-center {
+  display: flex;
+  justify-content: flex-end;
+  /* Alineación de los filtros a la derecha */
+  flex-wrap: wrap;
+  /* Permite que se ajusten cuando el espacio es pequeño */
+}
+
+/* Aseguramos que los filtros estén pegados en la orilla derecha y en fila horizontal */
+.row.mb-3.align-items-center>.col-md-3 {
+  display: flex;
+  justify-content: flex-start;
+  /* Alinea a la izquierda dentro de su contenedor */
+}
+
+.search-input,
+.select-filter {
+  margin-right: 10px;
+  /* Separación entre los campos */
+}
+
+/* Opcional: Si deseas que el "Nuevo" botón esté alineado a la derecha */
+.col-md-2.d-flex.justify-content-end {
+  display: flex;
+  justify-content: flex-end;
+  /* Alinea el botón de "Nuevo" a la derecha */
+}
+
+.btn-custom {
   background-color: white;
   color: black;
+  border: 1px solid #ccc;
+  padding: 5px 10px;
+  font-size: 0.875rem;
+}
+
+.btn-custom:hover {
+  background-color: #f8f9fa;
 }
 
 @media (max-width: 768px) {
