@@ -30,7 +30,7 @@ const initialUsers = [
     phone: "555-5678",
     schedule: "Medio Tiempo",
   },
-  {
+   {
     id: 3,
     name: "Angel Eduardo Juarez Alvizo",
     username: "angelJuarez",
@@ -51,11 +51,11 @@ const initialUsers = [
     email: "almacen.general@lapi.com.mx",
     phone: "555-5678",
     schedule: "Medio Tiempo",
-  },
+  }
 ];
 
 const Employee = () => {
-  const [users, setUsers] = useState(initialUsers); // Almacenar usuarios en el estado
+  const [users, setUsers] = useState(initialUsers);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("Todos");
   const [roleFilter, setRoleFilter] = useState("Todos");
@@ -64,7 +64,7 @@ const Employee = () => {
   const filteredUsers = users.filter(
     (user) =>
       (user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.role.toLowerCase().includes(searchTerm.toLowerCase())) &&
+        user.role.toLowerCase().includes(searchTerm.toLowerCase())) &&
       (statusFilter === "Todos" || user.status === statusFilter) &&
       (roleFilter === "Todos" || user.role === roleFilter)
   );
@@ -103,11 +103,98 @@ const Employee = () => {
     const updatedUsers = users.map((user) =>
       user.id === id ? { ...user, status: user.status === "Activo" ? "Inactivo" : "Activo" } : user
     );
-    setUsers(updatedUsers); // Actualizar el estado con los usuarios modificados
+    setUsers(updatedUsers);
   };
 
-  const handleEditUser = (id) => {
-    navigate(`/edit-employee/${id}`);
+  const handleEditUser = (user) => {
+    Swal.fire({
+      title: "Editar Empleado",
+      html: `
+        <form id="editForm">
+          <div class="input-field">
+            <input
+              required
+              autocomplete="off"
+              type="text"
+              name="name"
+              id="name"
+              value="${user.name}"
+            />
+            <label for="name">Nombre</label>
+          </div>
+          <div class="input-field">
+            <input
+              required
+              autocomplete="off"
+              type="text"
+              name="username"
+              id="username"
+              value="${user.username}"
+            />
+            <label for="username">Usuario</label>
+          </div>
+          <div class="input-field">
+            <select name="role" id="role">
+              <option value="Admin" ${user.role === "Admin" ? "selected" : ""}>Admin</option>
+              <option value="Desarrollo" ${user.role === "Desarrollo" ? "selected" : ""}>Desarrollo</option>
+              <option value="Soporte" ${user.role === "Soporte" ? "selected" : ""}>Soporte</option>
+              <option value="Ventas" ${user.role === "Ventas" ? "selected" : ""}>Ventas</option>
+            </select>
+            <label for="role">Rol</label>
+          </div>
+          <div class="input-field">
+            <input
+              required
+              autocomplete="off"
+              type="email"
+              name="email"
+              id="email"
+              value="${user.email}"
+            />
+            <label for="email">Email</label>
+          </div>
+          <div class="input-field">
+            <input
+              required
+              autocomplete="off"
+              type="tel"
+              name="phone"
+              id="phone"
+              value="${user.phone}"
+            />
+            <label for="phone">Teléfono</label>
+          </div>
+          <div class="input-field">
+            <select name="schedule" id="schedule">
+              <option value="Completo" ${user.schedule === "Completo" ? "selected" : ""}>Completo</option>
+              <option value="Medio Tiempo" ${user.schedule === "Medio Tiempo" ? "selected" : ""}>Medio Tiempo</option>
+            </select>
+            <label for="schedule">Horario</label>
+          </div>
+        </form>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Guardar Cambios",
+      cancelButtonText: "Cancelar",
+      focusConfirm: false,
+      preConfirm: () => {
+        const name = Swal.getPopup().querySelector("#name").value;
+        const username = Swal.getPopup().querySelector("#username").value;
+        const role = Swal.getPopup().querySelector("#role").value;
+        const email = Swal.getPopup().querySelector("#email").value;
+        const phone = Swal.getPopup().querySelector("#phone").value;
+        const schedule = Swal.getPopup().querySelector("#schedule").value;
+
+        return { name, username, role, email, phone, schedule };
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const updatedUser = { ...user, ...result.value };
+        const updatedUsers = users.map((u) => (u.id === updatedUser.id ? updatedUser : u));
+        setUsers(updatedUsers);
+        Swal.fire("¡Guardado!", "Los cambios han sido guardados.", "success");
+      }
+    });
   };
 
   return (
@@ -146,7 +233,7 @@ const Employee = () => {
               </Col>
               <Col md={2} className="d-flex justify-content-end">
                 <Button variant="primary" className="btn-new" onClick={handleNewEmployee}>
-                   <HiMiniUserPlus style={{ pa: "2px" }} />  Nuevo
+                  <HiMiniUserPlus style={{ pa: "2px" }} /> Nuevo
                 </Button>
               </Col>
             </Row>
@@ -174,7 +261,7 @@ const Employee = () => {
                       <Button variant="info" onClick={() => handleViewDetails(user)}>
                         <FaEye />
                       </Button>
-                      <Button variant="warning" onClick={() => handleEditUser(user.id)}>
+                      <Button variant="warning" onClick={() => handleEditUser(user)}>
                         <FaEdit />
                       </Button>
                       <Button variant={user.status === "Activo" ? "danger" : "success"} onClick={() => handleToggleStatus(user.id)}>
