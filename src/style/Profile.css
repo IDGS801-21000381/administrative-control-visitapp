@@ -1,0 +1,47 @@
+.profile-container {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.profile-content {
+  display: flex;
+  gap: 20px;
+}
+
+.profile-image {
+  text-align: center;
+}
+
+.profile-image img {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-image input {
+  margin-top: 10px;
+}
+
+.profile-form {
+  flex: 1;
+}
+
+.profile-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.profile-form input,
+.profile-form select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.profile-form input[type="file"] {
+  border: none;
+}
