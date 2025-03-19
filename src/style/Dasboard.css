@@ -140,3 +140,70 @@ body {
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+/* Estilos para los inputs y selects */
+.input-search,
+.select-filter {
+  flex: 0 1 auto;
+  /* Evita que crezcan demasiado */
+  min-width: 100px;
+  /* Reduce el ancho mínimo */
+  height: 28px;
+  /* Ajusta la altura */
+  font-size: 0.8rem;
+  /* Tamaño de fuente más pequeño */
+  padding: 2px 5px;
+  font-family: 'Arial Black', Arial, sans-serif;
+  /* Fuente Arial Black */
+  border: 1px solid #8d8d8d;
+  /* Borde gris */
+  border-radius: 8px;
+  /* Bordes redondeados */
+  background-color: #fff;
+  /* Fondo blanco */
+  color: #000;
+  /* Texto negro */
+  outline: none;
+  /* Elimina el borde al hacer focus */
+  transition: border-color 0.3s ease;
+  /* Transición suave */
+}
+
+.input-search:focus,
+.select-filter:focus {
+  border-color: #0034de;
+  /* Borde azul al hacer focus */
+}
+
+/* Estilos para los botones (no los cambiamos) */
+.btn-today,
+.btn-week,
+.btn-search {
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  height: 28px;
+  width: auto;
+  border: none;
+  white-space: nowrap;
+}
+
+.btn-today,
+.btn-week {
+  background-color: #6c757d;
+}
+
+.btn-search {
+  background-color: #163A6B;
+}
+
+.btn-today:hover,
+.btn-week:hover {
+  background-color: #5a6268;
+}
+
+.btn-search:hover {
+  background-color: #1E4A7A;
+}
+
+.btn-search:active {
+  background-color: #0D2A4A;
+}
