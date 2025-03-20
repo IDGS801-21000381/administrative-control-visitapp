@@ -200,7 +200,7 @@ const Sidebar = () => {
                 { to: "/soporte/documentacion", text: "Documentación" }
               ]}
             />
-            <SidebarItem to="/documentos" icon={<FaFileAlt />} text="Documentos" />
+            <SidebarItem to="/Docuemnto" icon={<FaFileAlt />} text="Documentos" />
           </ul>
         </nav>
 
