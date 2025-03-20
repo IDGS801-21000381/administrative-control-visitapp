@@ -5,7 +5,8 @@ import Swal from 'sweetalert2';
 import '../style/Profile.css';
 
 const Profile = () => {
-  const [formData, setFormData] = useState({
+  // Datos iniciales
+  const initialData = {
     nombre: 'Florian Lizet Mata',
     primerApellido: '',
     segundoApellido: '',
@@ -21,14 +22,23 @@ const Profile = () => {
     fotografia: 'https://static.vecteezy.com/system/resources/previews/008/844/895/non_2x/user-icon-design-free-png.png',
     estado: 'Activo',
     homeOffice: 'Lunes',
-  });
+  };
+
+  const [formData, setFormData] = useState(initialData);
+  const [hasChanges, setHasChanges] = useState(false); // Estado para detectar cambios
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    const updatedData = { ...formData, [name]: value };
+
+    setFormData(updatedData);
+
+    // Comparar los datos actuales con los iniciales
+    const changesDetected = Object.keys(initialData).some(
+      (key) => updatedData[key] !== initialData[key]
+    );
+
+    setHasChanges(changesDetected);
   };
 
   const handleImageChange = (e) => {
@@ -36,10 +46,15 @@ const Profile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setFormData({
-          ...formData,
-          fotografia: reader.result,
-        });
+        const updatedData = { ...formData, fotografia: reader.result };
+        setFormData(updatedData);
+
+        // Comparar los datos actuales con los iniciales
+        const changesDetected = Object.keys(initialData).some(
+          (key) => updatedData[key] !== initialData[key]
+        );
+
+        setHasChanges(changesDetected);
       };
       reader.readAsDataURL(file);
     }
@@ -48,6 +63,7 @@ const Profile = () => {
   const handleSave = () => {
     console.log('Datos guardados:', formData);
     Swal.fire('Éxito', 'Cambios guardados correctamente.', 'success');
+    setHasChanges(false); // Reiniciar el estado de cambios
   };
 
   const handleChangePassword = async () => {
@@ -98,16 +114,16 @@ const Profile = () => {
                   alt="Foto de perfil"
                   className="profile-img"
                 />
-                <label htmlFor="upload-photo" className="upload-icon">
-                  <FaUpload />
-                  <input
-                    type="file"
-                    id="upload-photo"
-                    onChange={handleImageChange}
-                    style={{ display: 'none' }}
-                  />
-                </label>
               </div>
+              <label htmlFor="upload-photo" className="upload-icon">
+                <FaUpload />
+                <input
+                  type="file"
+                  id="upload-photo"
+                  onChange={handleImageChange}
+                  style={{ display: 'none' }}
+                />
+              </label>
               <p className="image-text">Cambiar foto</p>
             </div>
 
@@ -249,10 +265,20 @@ const Profile = () => {
                 </div>
 
                 <div className="form-actions" style={{ gap: '10px' }}>
-                  <button type="button" className="btn-save" onClick={handleSave}>
+                  <button
+                    type="button"
+                    className="btn-save"
+                    style={{
+                      backgroundColor: hasChanges ? '#163A6B' : '#A0A0A0',
+                      opacity: hasChanges ? 1 : 0.7,
+                      cursor: hasChanges ? 'pointer' : 'not-allowed',
+                    }}
+                    onClick={handleSave}
+                    disabled={!hasChanges}
+                  >
                     <FaSave /> Guardar Cambios
                   </button>
-                                    <button
+                  <button
                     type="button"
                     className="btn-save"
                     style={{ backgroundColor: '#E67E22', marginLeft: '10px' }}
@@ -260,7 +286,6 @@ const Profile = () => {
                   >
                     <FaKey /> Cambiar Contraseña
                   </button>
-
                 </div>
               </form>
             </div>

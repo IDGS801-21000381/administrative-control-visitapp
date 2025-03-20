@@ -48,15 +48,18 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
+  /* Añadir posición relativa */
 }
 
 .profile-image {
-  position: relative;
   width: 200px;
   height: 200px;
   border-radius: 50%;
   overflow: hidden;
   border: 4px solid #163A6B;
+  position: relative;
+  /* Añadir posición relativa */
 }
 
 .profile-img {
@@ -67,8 +70,13 @@ body {
 
 .upload-icon {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
+  /* Mantener posición absoluta */
+  top: 79%;
+  /* Centrar verticalmente */
+  left: calc(61% + 5px);
+  /* Ajustar la distancia a la derecha del círculo */
+  transform: translateY(-50%);
+  /* Centrar verticalmente */
   background-color: #163A6B;
   color: white;
   padding: 8px;
