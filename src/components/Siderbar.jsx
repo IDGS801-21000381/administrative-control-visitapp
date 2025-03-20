@@ -55,8 +55,8 @@ const Sidebar = () => {
     Swal.fire("Notificación marcada como vista", "", "success");
   };
 
-  const clearReadNotifications = () => {
-    setNotifications(notifications.filter((notif) => !notif.read));
+  const clearAllNotifications = () => {
+    setNotifications([]); // Limpiar todas las notificaciones
     Swal.fire("Bandeja limpiada", "", "success");
   };
 
@@ -83,6 +83,50 @@ const Sidebar = () => {
     setIsOpen(false);
     setIsNotificationOpen(false); // Cerrar notificaciones al cerrar el sidebar
   };
+
+  // Cerrar el menú de notificaciones al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const notificationDropdown = document.querySelector(".notification-dropdown");
+      const notificationBell = document.querySelector(".notification-bell");
+
+      if (
+        notificationDropdown &&
+        !notificationDropdown.contains(event.target) &&
+        !notificationBell.contains(event.target)
+      ) {
+        setIsNotificationOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  // Cerrar el sidebar al hacer clic fuera
+  useEffect(() => {
+    const handleClickOutsideSidebar = (event) => {
+      const sidebar = document.querySelector(".sidebar");
+      const sidebarToggle = document.querySelector(".sidebar-toggle");
+
+      if (
+        sidebar &&
+        !sidebar.contains(event.target) &&
+        !sidebarToggle.contains(event.target)
+      ) {
+        setIsOpen(false); // Cerrar el sidebar
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutsideSidebar);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutsideSidebar);
+    };
+  }, []);
 
   return (
     <>
@@ -129,7 +173,7 @@ const Sidebar = () => {
               isExpanded={activeMenu === "clientes"}
               onToggle={() => toggleSubmenu("clientes")}
               items={[
-                { to: "/Client", text: "Nuevo Cliente" },
+                { to: "/Cliente", text: "Nuevo Cliente" },
                 { to: "/clientes/lista", text: "Lista de Clientes" },
                 { to: "/clientes/seguimiento", text: "Seguimiento" }
               ]}
@@ -186,8 +230,8 @@ const Sidebar = () => {
               <p className="no-notifications">No hay notificaciones.</p>
             )}
           </div>
-          {notifications.some((notif) => notif.read) && (
-            <button className="clear-btn" onClick={clearReadNotifications}>Limpiar Bandeja</button>
+          {notifications.length > 0 && (
+            <button className="clear-btn" onClick={clearAllNotifications}>Limpiar Bandeja</button>
           )}
         </div>
       )}

@@ -12,7 +12,6 @@
   overflow: hidden;
   transition: transform 0.3s ease-in-out;
   z-index: 1000;
-  /* Aumenta el z-index para asegurar que esté arriba */
 }
 
 /* Estado de Sidebar cerrado */
@@ -29,9 +28,7 @@
 .sidebar-toggle {
   position: fixed;
   top: 10px;
-  /* Ajusta la posición vertical */
   left: 10px;
-  /* Ajusta la posición horizontal */
   background: white;
   border: 2px solid black;
   border-radius: 8px;
@@ -42,7 +39,6 @@
   align-items: center;
   cursor: pointer;
   z-index: 1001;
-  /* Asegúrate de que esté arriba del sidebar */
 }
 
 .sidebar-toggle img {
@@ -71,16 +67,13 @@
 .close-btn {
   position: absolute;
   top: 10px;
-  /* Ajusta la posición vertical */
   right: 10px;
-  /* Ajusta la posición horizontal */
   background: none;
   border: 2px solid white;
   color: #ffffff;
   font-size: 25px;
   width: 40px;
   height: 40px;
-  /* Ajusta la altura */
   display: flex;
   justify-content: center;
   align-items: center;
@@ -120,18 +113,28 @@
   border-bottom: 1px solid #ddd;
 }
 
+/* Animación para el contenedor del nombre del usuario y el icono */
 .profile-link {
   display: flex;
   align-items: center;
   text-decoration: none;
   color: black;
+  transition: color 0.1s ease, transform 0.1s ease; /* Transición más rápida */
 }
 
+.profile-link:hover {
+  color: #1565c0; /* Cambiar el color de la letra y el icono a azul al pasar el mouse */
+  transform: scale(1.05); /* Hacer que el texto y el icono crezcan un 5% */
+}
+
+/* Estilos para el icono de usuario */
 .user-icon {
   font-size: 20px;
   margin-right: 10px;
+  transition: color 0.1s ease, transform 0.1s ease; /* Transición más rápida */
 }
 
+/* Estilos para el nombre del usuario */
 .user-name {
   font-weight: bold;
   font-size: 16px;
@@ -139,6 +142,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   max-width: 150px;
+  transition: color 0.1s ease, transform 0.1s ease; /* Transición más rápida */
 }
 
 /* Reducción del tamaño del botón de notificación */
@@ -197,7 +201,385 @@
   max-height: 400px;
   overflow-y: auto;
   z-index: 1002;
-  /* Asegúrate de que esté arriba del sidebar y del botón de toggle */
+  padding: 10px;
+}
+
+/* Ítems de notificaciones */
+.notification-item {
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #eee;
+  transition: background 0.3s;
+  color: black;
+}
+
+.notification-item.unread {
+  background: #f0f8ff;
+}
+
+.notification-item:hover {
+  background: #e0e0e0;
+}
+
+/* Botón "Ver" */
+.mark-read {
+  background: #317eeb;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.mark-read:hover {
+  background: #1565c0;
+}
+
+/* Botón "Limpiar Bandeja" */
+.clear-btn {
+  width: 100%;
+  background: red;
+  color: white;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.clear-btn:hover {
+  background: darkred;
+}
+
+/* Estilo para el mensaje "No hay notificaciones" */
+.no-notifications {
+  text-align: center;
+  color: #888;
+  padding: 10px;
+  font-size: 14px;
+}
+
+/* Menú */
+.menu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Items del menú */
+.menu-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  text-decoration: none;
+  color: #333;
+  font-size: 16px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.menu-icon {
+  width: 30px;
+  text-align: center;
+  margin-right: 10px;
+}
+
+.menu-link:hover {
+  background-color: #f5f5f5;
+  transform: scale(1.05);
+}
+
+/* Submenús */
+.submenu {
+  display: none;
+  padding-left: 20px;
+  background-color: #f8f9fa;
+  transition: max-height 0.3s ease-out, opacity 0.3s ease;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  border-left: 4px solid #1565c0;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+/* Submenú expandido */
+.submenu.expanded {
+  display: block;
+  max-height: 500px;
+  opacity: 1;
+  box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Animación en los submenús */
+.submenu-item {
+  padding: 8px 0;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* Enlaces del submenú */
+.submenu-link {
+  text-decoration: none;
+  color: #333;
+  font-size: 14px;
+  display: block;
+  padding: 8px 15px;
+  border-radius: 5px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+/* Efecto hover en los submenús */
+.submenu-link:hover {
+  background-color: #1565c0;
+  color: white;
+  transform: scale(1.05);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Flecha del submenú */
+.chevron-icon {
+  margin-left: auto;
+  transition: transform 0.3s ease;
+}
+
+/* Asegura que la flecha gire con el submenú */
+.submenu.expanded .chevron-icon {
+  transform: rotate(180deg);
+}
+
+/* Línea separadora */
+.separator {
+  height: 1px;
+  background-color: #ddd;
+  margin: 10px 20px;
+}
+
+/* Botón de cerrar sesión */
+.logout .menu-link {
+  color: red;
+  font-weight: bold;
+}
+
+/* Estilos para SweetAlert2 */
+.swal-confirm-button {
+  background-color: #317eeb !important;
+  color: white !important;
+}
+
+.swal-cancel-button {
+  background-color: #ddd !important;
+  color: black !important;
+}/* Sidebar principal */
+.sidebar {
+  width: 250px;
+  height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid #ddd;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  left: 0;
+  top: 0;
+  overflow: hidden;
+  transition: transform 0.3s ease-in-out;
+  z-index: 1000;
+}
+
+/* Estado de Sidebar cerrado */
+.sidebar.closed {
+  transform: translateX(-100%);
+}
+
+/* Estado de Sidebar abierto */
+.sidebar.open {
+  transform: translateX(0);
+}
+
+/* Botón flotante para abrir el sidebar */
+.sidebar-toggle {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  background: white;
+  border: 2px solid black;
+  border-radius: 8px;
+  width: 80px;
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.sidebar-toggle img {
+  width: 100%;
+  border-radius: 50%;
+}
+
+/* Estilo para el punto rojo de notificaciones en el botón de toggle */
+.sidebar-toggle .notification-dot {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 8px;
+  height: 8px;
+  background: red;
+  border-radius: 50%;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Ocultar el punto rojo si no hay notificaciones no leídas */
+.sidebar-toggle .notification-dot.hidden {
+  opacity: 0;
+}
+
+/* Botón de cerrar sidebar */
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: 2px solid white;
+  color: #ffffff;
+  font-size: 25px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  z-index: 10;
+  border-radius: 5px;
+}
+
+.close-btn:hover {
+  background-color: transparent;
+  color: red;
+  border: 3px solid red;
+  border-radius: 15px;
+}
+
+/* Header */
+.sidebar-header {
+  background-color: #1565c0;
+  color: white;
+  padding: 20px;
+  text-align: center;
+  position: relative;
+}
+
+.logo {
+  width: 120px;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+/* Usuario */
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Animación para el contenedor del nombre del usuario y el icono */
+.profile-link {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: black;
+  transition: color 0.1s ease, transform 0.1s ease;
+  /* Transición más rápida */
+}
+
+.profile-link:hover {
+  color: #1565c0;
+  /* Cambiar el color de la letra y el icono a azul al pasar el mouse */
+  transform: scale(1.05);
+  /* Hacer que el texto y el icono crezcan un 5% */
+}
+
+/* Estilos para el icono de usuario */
+.user-icon {
+  font-size: 20px;
+  margin-right: 10px;
+  transition: color 0.1s ease, transform 0.1s ease;
+  /* Transición más rápida */
+}
+
+/* Estilos para el nombre del usuario */
+.user-name {
+  font-weight: bold;
+  font-size: 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  transition: color 0.1s ease, transform 0.1s ease;
+  /* Transición más rápida */
+}
+
+/* Reducción del tamaño del botón de notificación */
+.notification-bell {
+  background: none;
+  border: none;
+  padding: 5px;
+  cursor: pointer;
+  position: relative;
+  margin-left: 40px;
+  width: 60px;
+  height: 70px;
+}
+
+.bell-icon {
+  font-size: 30px;
+  color: #317eeb;
+  transition: color 0.3s ease-in-out;
+}
+
+.notification-bell:hover .bell-icon {
+  color: white;
+}
+
+.notification-bell.active .bell-icon {
+  color: white;
+}
+
+/* Estilo para el punto rojo de notificaciones */
+.notification-dot {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  width: 8px;
+  height: 8px;
+  background: red;
+  border-radius: 50%;
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Ocultar el punto rojo si no hay notificaciones no leídas */
+.notification-dot.hidden {
+  opacity: 0;
+}
+
+/* Ajuste de la posición de notification-dropdown */
+.notification-dropdown {
+  position: absolute;
+  left: 260px;
+  top: 50px;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  width: 250px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1002;
   padding: 10px;
 }
 
