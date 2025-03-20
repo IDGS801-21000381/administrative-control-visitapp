@@ -110,7 +110,7 @@ const Dasboard = () => {
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
             />
-            <Form.Select className="input-search">
+            <Form.Select className="select-filter">
               <option selected>Seleccione</option>
               <option>Enero</option>
               <option>Febrero</option>
@@ -124,7 +124,7 @@ const Dasboard = () => {
               <option>Noviembre</option>
               <option>Diciembre</option>
             </Form.Select>
-            <Form.Select className="input-search">
+            <Form.Select className="select-filter">
               <option selected>Seleccione</option>
               <option>2020</option>
               <option>2021</option>
