@@ -159,6 +159,12 @@ const Client = () => {
                       <Form.Label>Nombre del Administrador *</Form.Label>
                       <Form.Control type="text" name="adminName" required />
                     </Form.Group>
+                    </Col>
+                    <Col md={6}>
+                    <Form.Group>
+                      <Form.Label>Nombre del Administrador *</Form.Label>
+                      <Form.Control type="text" name="adminName" required />
+                    </Form.Group>
                   </Col>
                   <Col md={6}>
                     <Form.Group>
