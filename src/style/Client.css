@@ -10,31 +10,24 @@
   border: 1px solid #ccc;
   font-size: 0.875rem;
 }
-
-/* Alineación de los filtros a la derecha y en fila horizontal */
 .row.mb-3.align-items-center {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
 }
-
-/* Aseguramos que los filtros estén pegados en la orilla derecha y en fila horizontal */
 .row.mb-3.align-items-center>.col-md-3 {
   display: flex;
   justify-content: flex-start;
 }
-
 .search-input,
 .select-filter {
   margin-right: 10px;
 }
 
-/* Opcional: Si deseas que el "Nuevo" botón esté alineado a la derecha */
 .col-md-2.d-flex.justify-content-end {
   display: flex;
   justify-content: flex-end;
 }
-
 .btn-custom {
   background-color: white;
   color: black;
@@ -42,49 +35,38 @@
   padding: 5px 10px;
   font-size: 0.875rem;
 }
-
 .btn-custom:hover {
   background-color: #f8f9fa;
 }
-
 @media (max-width: 768px) {
   .card_e {
     width: 100%;
   }
 }
-
-/* Estilos para el modal */
 .modal-content {
   border-radius: 20px;
   background-color: #fff;
   border: solid 1px #8d8d8d;
 }
-
 .modal-header {
   border-bottom: none;
 }
-
 .modal-title {
   font-size: 1.3rem;
   font-weight: bolder;
 }
-
 .modal-body {
   padding: 20px;
 }
-
-/* Estilos para el formulario dentro del modal */
 .edit-form {
   max-width: 100%;
   display: flex;
   flex-direction: column;
   gap: 20px;
 }
-
 .edit-form .input-field {
   position: relative;
 }
-
 .edit-form .input-field label {
   position: absolute;
   color: #8d8d8d;
@@ -94,6 +76,8 @@
   transform: translateY(0.6rem);
   transition: all 0.3s ease;
 }
+
+
 
 .edit-form .input-field input,
 .edit-form .input-field select {
@@ -106,7 +90,6 @@
   background-color: #fff;
   color: #000;
 }
-
 .edit-form .input-field input:focus,
 .edit-form .input-field input:valid,
 .edit-form .input-field select:focus,
@@ -114,7 +97,6 @@
   outline: none;
   border: solid 1px #0034de;
 }
-
 .edit-form .input-field input:focus~label,
 .edit-form .input-field input:valid~label,
 .edit-form .input-field select:focus~label,
@@ -128,7 +110,6 @@
   border: none;
   border-radius: 100px;
 }
-
 .edit-form .btn-container {
   width: 100%;
   display: flex;

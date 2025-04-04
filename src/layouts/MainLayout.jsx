@@ -1,6 +1,6 @@
 import React from 'react';
 import Sidebar from '../components/Siderbar';
-import '../style/style.css'; // Asegúrate de que el archivo CSS esté correctamente vinculado
+import '../style/style.css'; 
 import NotificationBell from '../components/NotificationBell';
 import { Container, Row, Col, Card, Button, ButtonGroup, Form } from 'react-bootstrap';
 

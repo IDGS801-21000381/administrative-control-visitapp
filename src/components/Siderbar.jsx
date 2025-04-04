@@ -56,7 +56,7 @@ const Sidebar = () => {
   };
 
   const clearAllNotifications = () => {
-    setNotifications([]); // Limpiar todas las notificaciones
+    setNotifications([]); 
     Swal.fire("Bandeja limpiada", "", "success");
   };
 
@@ -195,7 +195,7 @@ const Sidebar = () => {
               isExpanded={activeMenu === "soporte"}
               onToggle={() => toggleSubmenu("soporte")}
               items={[
-                { to: "/soporte/tickets", text: "Tickets" },
+                { to: "/Reportes", text: "Tickets" },
                 { to: "/soporte/cursos", text: "Cursos" },
                 { to: "/soporte/documentacion", text: "Documentación" }
               ]}

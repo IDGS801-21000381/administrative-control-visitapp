@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import Support from "./pages/Support";
 import Document from "./pages/Document";
 import Page404 from "./pages/page404";
+import CreateReports from "./pages/CreateReports";
 
 const App = () => {
   const [auth, setAuth] = useState(localStorage.getItem("isAuthenticated") === "true");
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="/Perfil" element={<ProtectedRoute element={<Profile />} />} />
         <Route path="/Soporte" element={<ProtectedRoute element={<Support />} />} />
         <Route path="/Docuemnto" element={<ProtectedRoute element={<Document />} />} />
+         <Route path="/Reportes" element={<ProtectedRoute element={<CreateReports />} />} />
         <Route path="*" element={<Page404 />} />
       </Routes>
     </Router>
@@ -42,3 +44,13 @@ const App = () => {
 };
 
 export default App;
+
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+}
