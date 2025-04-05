@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import MainLayout from '../layouts/MainLayout';
 import '../style/Client.css';
 import Papa from 'papaparse';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 const tenants = [
   "adamant", "aldaba1", "altozano", "arboleda", "arras", "basania", "campina", "campina1",
@@ -32,6 +34,8 @@ const CreateReports = () => {
   const [csvData, setCsvData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [fileUploaded, setFileUploaded] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const reportRef = useRef();
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -54,19 +58,16 @@ const CreateReports = () => {
 
     let filtered = csvData;
 
-    // Filtrar por tenant si está seleccionado
     if (selectedTenant) {
       filtered = filtered.filter(row => 
         row[6]?.toLowerCase() === selectedTenant.toLowerCase()
       );
     }
 
-    // Filtrar por mes si está seleccionado
     if (selectedMonth) {
       filtered = filtered.filter(row => {
         if (!row[1]) return false;
         
-        // Extraer mes de la fecha (formato esperado: DD/MM/YYYY o similar)
         const dateParts = row[1].split(/[/-]/);
         if (dateParts.length < 2) return false;
         
@@ -78,6 +79,122 @@ const CreateReports = () => {
     }
 
     setFilteredData(filtered);
+  };
+
+  const getFrequentIssues = (data) => {
+    if (data.length === 0) return 'No se encontraron problemas recurrentes';
+    
+    const issues = {};
+    data.forEach(row => {
+      const issue = row[8] || 'Desconocido';
+      issues[issue] = (issues[issue] || 0) + 1;
+    });
+    
+    const sortedIssues = Object.entries(issues).sort((a, b) => b[1] - a[1]);
+    return sortedIssues.slice(0, 3).map(([issue, count]) => 
+      `${issue} (${count} veces)`
+    ).join(', ');
+  };
+
+  const getNextMonth = (currentMonth) => {
+    if (!currentMonth) return 'Próximo mes';
+    
+    const monthOrder = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    
+    const currentIndex = monthOrder.indexOf(currentMonth);
+    if (currentIndex === -1) return 'Próximo mes';
+    
+    const nextIndex = (currentIndex + 1) % 12;
+    return monthOrder[nextIndex];
+  };
+
+  const downloadPdf = async () => {
+    if (!reportRef.current || filteredData.length === 0) return;
+    
+    setIsGeneratingPdf(true);
+    
+    try {
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      
+      // Configuración optimizada para html2canvas
+      const options = {
+        scale: 1,
+        useCORS: true,
+        logging: false,
+        removeContainer: true,
+        backgroundColor: '#ffffff',
+        windowWidth: 900,
+        width: 900
+      };
+      
+      // Función para agregar una imagen al PDF
+      const addImageToPdf = async (element, isFirstPage = true) => {
+        const canvas = await html2canvas(element, options);
+        const imgData = canvas.toDataURL('image/jpeg', 0.8); // Compresión JPEG al 80%
+        
+        const imgWidth = pageWidth - 20; // Margen de 10mm cada lado
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        
+        if (!isFirstPage) {
+          pdf.addPage();
+        }
+        
+        pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
+        return imgHeight;
+      };
+      
+      // Primero intentamos con el reporte completo
+      try {
+        await addImageToPdf(reportRef.current, true);
+      } catch (error) {
+        console.log('Contenido muy largo, dividiendo en páginas...');
+        
+        // Si falla, dividimos el contenido
+        const header = reportRef.current.querySelector('.report-header');
+        const sections = reportRef.current.querySelectorAll('.report-section');
+        
+        // Agregamos la primera página con el encabezado
+        const tempDiv1 = document.createElement('div');
+        tempDiv1.style.width = '900px';
+        tempDiv1.style.background = 'white';
+        tempDiv1.appendChild(header.cloneNode(true));
+        document.body.appendChild(tempDiv1);
+        await addImageToPdf(tempDiv1, true);
+        document.body.removeChild(tempDiv1);
+        
+        // Procesamos cada sección
+        for (let i = 0; i < sections.length; i++) {
+          const section = sections[i];
+          const tempDiv = document.createElement('div');
+          tempDiv.style.width = '900px';
+          tempDiv.style.background = 'white';
+          tempDiv.appendChild(section.cloneNode(true));
+          document.body.appendChild(tempDiv);
+          
+          try {
+            await addImageToPdf(tempDiv, false);
+          } catch (error) {
+            console.error(`Error al procesar sección ${i}:`, error);
+          }
+          
+          document.body.removeChild(tempDiv);
+        }
+      }
+      
+      // Guardar el PDF
+      pdf.save(`reporte_${selectedTenant || 'general'}_${selectedMonth || 'todos'}.pdf`);
+      
+    } catch (error) {
+      console.error('Error al generar PDF:', error);
+      alert('Ocurrió un error al generar el PDF. Por favor intenta nuevamente.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   return (
@@ -126,42 +243,211 @@ const CreateReports = () => {
               />
             </div>
 
-            <div className="d-grid">
+            <div className="d-grid gap-2 d-md-flex justify-content-md-end">
               <button 
                 type="button" 
-                className="btn btn-primary"
+                className="btn btn-primary me-md-2"
                 onClick={handleGenerateReport}
+                disabled={isGeneratingPdf}
               >
                 Generar Reporte
               </button>
+              
+              {filteredData.length > 0 && (
+                <button 
+                  type="button" 
+                  className="btn btn-success"
+                  onClick={downloadPdf}
+                  disabled={isGeneratingPdf}
+                >
+                  {isGeneratingPdf ? 'Generando PDF...' : 'Descargar Reporte PDF'}
+                </button>
+              )}
             </div>
           </form>
         </div>
 
         {filteredData.length > 0 && (
-          <div className="card mt-4 p-3 shadow-sm">
-            <h4 className="mb-3">Resultados del Reporte</h4>
-            <div className="table-responsive">
-              <table className="table table-striped table-hover">
-                <thead className="table-dark">
-                  <tr>
-                    <th>Fecha</th>
-                    <th>Tenant</th>
-                    <th>Problemática</th>
-                    <th>Observaciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((row, index) => (
-                    <tr key={index}>
-                      <td>{row[1]}</td>
-                      <td>{row[6]}</td>
-                      <td>{row[8]}</td>
-                      <td>{row[9]}</td>
+          <div className="mt-4">
+            <div 
+              ref={reportRef} 
+              style={{
+                background: 'white',
+                width: '900px',
+                margin: '0 auto',
+                boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
+                borderRadius: '10px',
+                overflow: 'hidden'
+              }}
+            >
+              {/* Encabezado del reporte */}
+              <div className="report-header">
+                <div style={{backgroundColor: '#005baa', height: '40px', width: '100%'}}></div>
+                
+                <div style={{padding: '30px 40px'}}>
+                  <div style={{textAlign: 'center', marginBottom: '30px'}}>
+                    <img 
+                      src="https://visitapp.la/images/logo-01.png" 
+                      alt="VisitApp Logo" 
+                      style={{width: '250px'}}
+                      crossOrigin="anonymous"
+                    />
+                  </div>
+                  
+                  <h1 style={{color: '#003f7d', textAlign: 'center', marginBottom: '10px'}}>
+                    Reporte Mensual de Atención y Soporte
+                  </h1>
+                  
+                  <p>
+                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Residencial:</span> 
+                    {selectedTenant || 'Todos los residenciales'}
+                  </p>
+                  
+                  <p>
+                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Periodo del Reporte:</span> 
+                    {selectedMonth || 'Todos los meses'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Sección 1: Resumen General */}
+              <div className="report-section" style={{padding: '0 40px'}}>
+                <h2 style={{color: '#005baa', marginTop: '30px'}}>1. Resumen General</h2>
+                <ul style={{paddingLeft: '20px'}}>
+                  <li>Total de Visitas o Soportes Realizados: {filteredData.length}</li>
+                  <li>Asuntos Resueltos: {filteredData.filter(row => row[10]?.toLowerCase().includes('resuelto')).length}</li>
+                  <li>Asuntos Pendientes o en Proceso: {filteredData.filter(row => row[10]?.toLowerCase().includes('proceso')).length}</li>
+                </ul>
+              </div>
+
+              {/* Sección 2: Detalle de Visitas */}
+              <div className="report-section" style={{padding: '0 40px 30px'}}>
+                <h2 style={{color: '#005baa', marginTop: '30px'}}>2. Detalle de Visitas o Soportes</h2>
+                <table style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                  marginTop: '10px',
+                  fontSize: '14px' // Tamaño de fuente reducido
+                }}>
+                  <thead>
+                    <tr>
+                      <th style={{
+                        backgroundColor: '#e0efff',
+                        color: '#003f7d',
+                        padding: '8px',
+                        textAlign: 'left',
+                        border: '1px solid #ccc'
+                      }}>Fecha</th>
+                      <th style={{
+                        backgroundColor: '#e0efff',
+                        color: '#003f7d',
+                        padding: '8px',
+                        textAlign: 'left',
+                        border: '1px solid #ccc'
+                      }}>Tipo de Soporte</th>
+                      <th style={{
+                        backgroundColor: '#e0efff',
+                        color: '#003f7d',
+                        padding: '8px',
+                        textAlign: 'left',
+                        border: '1px solid #ccc'
+                      }}>Descripción</th>
+                      <th style={{
+                        backgroundColor: '#e0efff',
+                        color: '#003f7d',
+                        padding: '8px',
+                        textAlign: 'left',
+                        border: '1px solid #ccc'
+                      }}>Solución</th>
+                      <th style={{
+                        backgroundColor: '#e0efff',
+                        color: '#003f7d',
+                        padding: '8px',
+                        textAlign: 'left',
+                        border: '1px solid #ccc'
+                      }}>Estado</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredData.map((row, index) => (
+                      <tr key={index}>
+                        <td style={{
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc'
+                        }}>{row[1] || 'N/A'}</td>
+                        <td style={{
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc'
+                        }}>{row[7] || 'N/A'}</td>
+                        <td style={{
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc',
+                          maxWidth: '200px',
+                          wordWrap: 'break-word'
+                        }}>{row[8] || 'N/A'}</td>
+                        <td style={{
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc',
+                          maxWidth: '200px',
+                          wordWrap: 'break-word'
+                        }}>{row[9] || 'N/A'}</td>
+                        <td style={{
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc'
+                        }}>{row[10] || 'N/A'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Sección 3: Incidencias */}
+              <div className="report-section" style={{padding: '0 40px 30px'}}>
+                <h2 style={{color: '#005baa', marginTop: '30px'}}>3. Incidencias Frecuentes y Recomendaciones</h2>
+                <ul style={{paddingLeft: '20px'}}>
+                  <li>
+                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Problemas Recurrentes:</span> 
+                    {getFrequentIssues(filteredData)}
+                  </li>
+                  <li>
+                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Recomendaciones:</span> 
+                    Realizar mantenimiento preventivo periódico y actualizar los sistemas regularmente.
+                  </li>
+                </ul>
+              </div>
+
+              {/* Sección 4: Siguientes pasos */}
+              <div className="report-section" style={{padding: '0 40px 30px'}}>
+                <h2 style={{color: '#005baa', marginTop: '30px'}}>4. Siguientes Pasos</h2>
+                <ul style={{paddingLeft: '20px'}}>
+                  <li>
+                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Plan de Mantenimiento Preventivo:</span> 
+                    Monitoreo continuo de parte de VisitApp
+                  </li>
+                  <li>
+                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Próxima Revisión:</span> 
+                    {getNextMonth(selectedMonth)}
+                  </li>
+                  <li>
+                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Acciones Pendientes por Confirmar:</span> 
+                    Seguimiento a casos en proceso
+                  </li>
+                </ul>
+              </div>
+
+              {/* Pie del reporte */}
+              <div className="report-section" style={{padding: '0 40px 30px'}}>
+                <p style={{marginTop: '30px'}}>
+                  Continuamos trabajando para garantizar la mejor experiencia y mantener un alto nivel de satisfacción entre nuestros clientes.
+                </p>
+              </div>
+
+              <div style={{backgroundColor: '#005baa', height: '40px', width: '100%'}}></div>
             </div>
           </div>
         )}
