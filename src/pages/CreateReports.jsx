@@ -4,6 +4,7 @@ import '../style/Client.css';
 import Papa from 'papaparse';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+import * as XLSX from 'xlsx';
 
 const tenants = [
   "adamant", "aldaba1", "altozano", "arboleda", "arras", "basania", "campina", "campina1",
@@ -11,6 +12,21 @@ const tenants = [
   "campina9", "campina10", "chivas", "cortes", "downtownsantafe", "fujiyama693", "lomas",
   "lomas1", "nymphe", "quintas", "bosques", "mirador", "granjardin", "riberas del campestre",
   "CoyoacLapian", "colinasVista hermosa", "Lapi", "Vista hermosa", "elgin", "yaxiik", "otro"
+];
+
+const months = [
+  { value: 'Enero', label: 'Enero' },
+  { value: 'Febrero', label: 'Febrero' },
+  { value: 'Marzo', label: 'Marzo' },
+  { value: 'Abril', label: 'Abril' },
+  { value: 'Mayo', label: 'Mayo' },
+  { value: 'Junio', label: 'Junio' },
+  { value: 'Julio', label: 'Julio' },
+  { value: 'Agosto', label: 'Agosto' },
+  { value: 'Septiembre', label: 'Septiembre' },
+  { value: 'Octubre', label: 'Octubre' },
+  { value: 'Noviembre', label: 'Noviembre' },
+  { value: 'Diciembre', label: 'Diciembre' }
 ];
 
 const monthsMap = {
@@ -111,6 +127,60 @@ const CreateReports = () => {
     return monthOrder[nextIndex];
   };
 
+  // Función para exportar a CSV
+  const exportToCSV = () => {
+    if (filteredData.length === 0) {
+      alert('No hay datos para exportar');
+      return;
+    }
+
+    const headers = [
+      'ID', 'Fecha', 'Hora', 'Usuario', 'Email', 'Teléfono', 
+      'Residencial', 'Tipo de Soporte', 'Descripción', 'Solución', 'Estado'
+    ];
+
+    const csvContent = [
+      headers,
+      ...filteredData
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `reporte_${selectedTenant || 'general'}_${selectedMonth || 'todos'}.csv`);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Función para exportar a Excel
+  const exportToExcel = () => {
+    if (filteredData.length === 0) {
+      alert('No hay datos para exportar');
+      return;
+    }
+
+    const headers = [
+      'ID', 'Fecha', 'Hora', 'Usuario', 'Email', 'Teléfono', 
+      'Residencial', 'Tipo de Soporte', 'Descripción', 'Solución', 'Estado'
+    ];
+
+    const wsData = [
+      headers,
+      ...filteredData
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    
+    XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
+    XLSX.writeFile(wb, `reporte_${selectedTenant || 'general'}_${selectedMonth || 'todos'}.xlsx`);
+  };
+
   const downloadPdf = async () => {
     if (!reportRef.current || filteredData.length === 0) return;
     
@@ -135,9 +205,9 @@ const CreateReports = () => {
       // Función para agregar una imagen al PDF
       const addImageToPdf = async (element, isFirstPage = true) => {
         const canvas = await html2canvas(element, options);
-        const imgData = canvas.toDataURL('image/jpeg', 0.8); // Compresión JPEG al 80%
+        const imgData = canvas.toDataURL('image/jpeg', 0.8);
         
-        const imgWidth = pageWidth - 20; // Margen de 10mm cada lado
+        const imgWidth = pageWidth - 20;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
         
         if (!isFirstPage) {
@@ -148,43 +218,43 @@ const CreateReports = () => {
         return imgHeight;
       };
       
-      // Primero intentamos con el reporte completo
-      try {
-        await addImageToPdf(reportRef.current, true);
-      } catch (error) {
-        console.log('Contenido muy largo, dividiendo en páginas...');
-        
-        // Si falla, dividimos el contenido
-        const header = reportRef.current.querySelector('.report-header');
-        const sections = reportRef.current.querySelectorAll('.report-section');
-        
-        // Agregamos la primera página con el encabezado
-        const tempDiv1 = document.createElement('div');
-        tempDiv1.style.width = '900px';
-        tempDiv1.style.background = 'white';
-        tempDiv1.appendChild(header.cloneNode(true));
-        document.body.appendChild(tempDiv1);
-        await addImageToPdf(tempDiv1, true);
-        document.body.removeChild(tempDiv1);
-        
-        // Procesamos cada sección
-        for (let i = 0; i < sections.length; i++) {
-          const section = sections[i];
-          const tempDiv = document.createElement('div');
-          tempDiv.style.width = '900px';
-          tempDiv.style.background = 'white';
-          tempDiv.appendChild(section.cloneNode(true));
-          document.body.appendChild(tempDiv);
-          
-          try {
-            await addImageToPdf(tempDiv, false);
-          } catch (error) {
-            console.error(`Error al procesar sección ${i}:`, error);
-          }
-          
-          document.body.removeChild(tempDiv);
-        }
-      }
+      // Dividir el contenido en 3 partes lógicas
+      const header = reportRef.current.querySelector('.report-header');
+      const section1 = reportRef.current.querySelector('.section-1');
+      const section2 = reportRef.current.querySelector('.section-2');
+      const section3 = reportRef.current.querySelector('.section-3');
+      const section4 = reportRef.current.querySelector('.section-4');
+      const footer = reportRef.current.querySelector('.report-footer');
+      
+      // Primera página: Encabezado + Sección 1
+      const tempDiv1 = document.createElement('div');
+      tempDiv1.style.width = '900px';
+      tempDiv1.style.background = 'white';
+      tempDiv1.appendChild(header.cloneNode(true));
+      tempDiv1.appendChild(section1.cloneNode(true));
+      document.body.appendChild(tempDiv1);
+      await addImageToPdf(tempDiv1, true);
+      document.body.removeChild(tempDiv1);
+      
+      // Segunda página: Sección 2 (tabla de visitas)
+      const tempDiv2 = document.createElement('div');
+      tempDiv2.style.width = '900px';
+      tempDiv2.style.background = 'white';
+      tempDiv2.appendChild(section2.cloneNode(true));
+      document.body.appendChild(tempDiv2);
+      await addImageToPdf(tempDiv2, false);
+      document.body.removeChild(tempDiv2);
+      
+      // Tercera página: Secciones 3 y 4 + footer
+      const tempDiv3 = document.createElement('div');
+      tempDiv3.style.width = '900px';
+      tempDiv3.style.background = 'white';
+      tempDiv3.appendChild(section3.cloneNode(true));
+      tempDiv3.appendChild(section4.cloneNode(true));
+      tempDiv3.appendChild(footer.cloneNode(true));
+      document.body.appendChild(tempDiv3);
+      await addImageToPdf(tempDiv3, false);
+      document.body.removeChild(tempDiv3);
       
       // Guardar el PDF
       pdf.save(`reporte_${selectedTenant || 'general'}_${selectedMonth || 'todos'}.pdf`);
@@ -220,17 +290,16 @@ const CreateReports = () => {
 
             <div className="mb-3">
               <label className="form-label">Seleccionar Mes</label>
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="Ej: 03, 3, marzo o mar"
+              <select 
+                className="form-select" 
                 value={selectedMonth}
-                onChange={(e) => {
-                  const input = e.target.value.toLowerCase();
-                  setSelectedMonth(monthsMap[input] || input);
-                }}
-              />
-              <small className="text-muted">Puedes usar número (1-12) o nombre del mes</small>
+                onChange={(e) => setSelectedMonth(e.target.value)}
+              >
+                <option value="">Todos los meses</option>
+                {months.map((month, index) => (
+                  <option key={index} value={month.value}>{month.label}</option>
+                ))}
+              </select>
             </div>
 
             <div className="mb-3">
@@ -254,14 +323,32 @@ const CreateReports = () => {
               </button>
               
               {filteredData.length > 0 && (
-                <button 
-                  type="button" 
-                  className="btn btn-success"
-                  onClick={downloadPdf}
-                  disabled={isGeneratingPdf}
-                >
-                  {isGeneratingPdf ? 'Generando PDF...' : 'Descargar Reporte PDF'}
-                </button>
+                <>
+                  <button 
+                    type="button" 
+                    className="btn btn-success me-md-2"
+                    onClick={downloadPdf}
+                    disabled={isGeneratingPdf}
+                  >
+                    {isGeneratingPdf ? 'Generando PDF...' : 'Descargar PDF'}
+                  </button>
+                  
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary me-md-2"
+                    onClick={exportToCSV}
+                  >
+                    Exportar CSV
+                  </button>
+                  
+                  <button 
+                    type="button" 
+                    className="btn btn-info"
+                    onClick={exportToExcel}
+                  >
+                    Exportar Excel
+                  </button>
+                </>
               )}
             </div>
           </form>
@@ -311,7 +398,7 @@ const CreateReports = () => {
               </div>
 
               {/* Sección 1: Resumen General */}
-              <div className="report-section" style={{padding: '0 40px'}}>
+              <div className="section-1 report-section" style={{padding: '0 40px'}}>
                 <h2 style={{color: '#005baa', marginTop: '30px'}}>1. Resumen General</h2>
                 <ul style={{paddingLeft: '20px'}}>
                   <li>Total de Visitas o Soportes Realizados: {filteredData.length}</li>
@@ -321,13 +408,13 @@ const CreateReports = () => {
               </div>
 
               {/* Sección 2: Detalle de Visitas */}
-              <div className="report-section" style={{padding: '0 40px 30px'}}>
+              <div className="section-2 report-section" style={{padding: '0 40px 30px'}}>
                 <h2 style={{color: '#005baa', marginTop: '30px'}}>2. Detalle de Visitas o Soportes</h2>
                 <table style={{
                   width: '100%',
                   borderCollapse: 'collapse',
                   marginTop: '10px',
-                  fontSize: '14px' // Tamaño de fuente reducido
+                  fontSize: '14px'
                 }}>
                   <thead>
                     <tr>
@@ -407,7 +494,7 @@ const CreateReports = () => {
               </div>
 
               {/* Sección 3: Incidencias */}
-              <div className="report-section" style={{padding: '0 40px 30px'}}>
+              <div className="section-3 report-section" style={{padding: '0 40px 30px'}}>
                 <h2 style={{color: '#005baa', marginTop: '30px'}}>3. Incidencias Frecuentes y Recomendaciones</h2>
                 <ul style={{paddingLeft: '20px'}}>
                   <li>
@@ -422,7 +509,7 @@ const CreateReports = () => {
               </div>
 
               {/* Sección 4: Siguientes pasos */}
-              <div className="report-section" style={{padding: '0 40px 30px'}}>
+              <div className="section-4 report-section" style={{padding: '0 40px 30px'}}>
                 <h2 style={{color: '#005baa', marginTop: '30px'}}>4. Siguientes Pasos</h2>
                 <ul style={{paddingLeft: '20px'}}>
                   <li>
@@ -441,7 +528,7 @@ const CreateReports = () => {
               </div>
 
               {/* Pie del reporte */}
-              <div className="report-section" style={{padding: '0 40px 30px'}}>
+              <div className="report-footer" style={{padding: '0 40px 30px'}}>
                 <p style={{marginTop: '30px'}}>
                   Continuamos trabajando para garantizar la mejor experiencia y mantener un alto nivel de satisfacción entre nuestros clientes.
                 </p>
