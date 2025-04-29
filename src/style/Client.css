@@ -183,3 +183,21 @@
   background: #fff;
   padding: 0 5px;
 }
+/* Asegurar que el contenedor del reporte ocupe el espacio adecuado */
+.report-container {
+  margin-top: 0;
+  padding: 15px;
+}
+
+/* Responsividad para móviles */
+@media (max-width: 768px) {
+
+  .col-md-4,
+  .col-md-8 {
+    width: 100%;
+  }
+
+  .report-container {
+    margin-top: 20px;
+  }
+}

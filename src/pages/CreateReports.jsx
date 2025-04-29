@@ -1,74 +1,103 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import MainLayout from '../layouts/MainLayout';
 import '../style/Client.css';
 import Papa from 'papaparse';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
-
-const tenants = [
-  "adamant", "aldaba1", "altozano", "arboleda", "arras", "basania", "campina", "campina1",
-  "campina2", "campina3", "campina4", "campina5", "campina6", "campina7", "campina8",
-  "campina9", "campina10", "chivas", "cortes", "downtownsantafe", "fujiyama693", "lomas",
-  "lomas1", "nymphe", "quintas", "bosques", "mirador", "granjardin", "riberas del campestre",
-  "CoyoacLapian", "colinasVista hermosa", "Lapi", "Vista hermosa", "elgin", "yaxiik", "otro"
-];
-
-const months = [
-  { value: 'Enero', label: 'Enero' },
-  { value: 'Febrero', label: 'Febrero' },
-  { value: 'Marzo', label: 'Marzo' },
-  { value: 'Abril', label: 'Abril' },
-  { value: 'Mayo', label: 'Mayo' },
-  { value: 'Junio', label: 'Junio' },
-  { value: 'Julio', label: 'Julio' },
-  { value: 'Agosto', label: 'Agosto' },
-  { value: 'Septiembre', label: 'Septiembre' },
-  { value: 'Octubre', label: 'Octubre' },
-  { value: 'Noviembre', label: 'Noviembre' },
-  { value: 'Diciembre', label: 'Diciembre' }
-];
-
-const monthsMap = {
-  '01': 'Enero', '1': 'Enero', 'enero': 'Enero',
-  '02': 'Febrero', '2': 'Febrero', 'febrero': 'Febrero', 'feb': 'Febrero',
-  '03': 'Marzo', '3': 'Marzo', 'marzo': 'Marzo', 'mar': 'Marzo',
-  '04': 'Abril', '4': 'Abril', 'abril': 'Abril', 'abr': 'Abril',
-  '05': 'Mayo', '5': 'Mayo', 'mayo': 'Mayo', 'may': 'Mayo',
-  '06': 'Junio', '6': 'Junio', 'junio': 'Junio', 'jun': 'Junio',
-  '07': 'Julio', '7': 'Julio', 'julio': 'Julio', 'jul': 'Julio',
-  '08': 'Agosto', '8': 'Agosto', 'agosto': 'Agosto', 'ago': 'Agosto',
-  '09': 'Septiembre', '9': 'Septiembre', 'septiembre': 'Septiembre', 'sep': 'Septiembre',
-  '10': 'Octubre', 'octubre': 'Octubre', 'oct': 'Octubre',
-  '11': 'Noviembre', 'noviembre': 'Noviembre', 'nov': 'Noviembre',
-  '12': 'Diciembre', 'diciembre': 'Diciembre', 'dic': 'Diciembre'
-};
+import tenants from '../constants/tenants';
+import monthsMap from '../constants/monthsMap';
+import '../utils/dateUtils.js';
+import { corregirTexto, resumirTexto } from '../service/textProcessor.js';
 
 const CreateReports = () => {
   const [selectedTenant, setSelectedTenant] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
+  const [includeNextReview, setIncludeNextReview] = useState(true);
   const [csvData, setCsvData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [fileUploaded, setFileUploaded] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [isProcessingText, setIsProcessingText] = useState(false);
+  const [reportSummary, setReportSummary] = useState('');
+  const [correctedTexts, setCorrectedTexts] = useState({});
   const reportRef = useRef();
+
+  const processReportTexts = useCallback(async (data) => {
+    setIsProcessingText(true);
+    try {
+      const textsToCorrect = {};
+      
+      const sampleData = data.slice(0, 5);
+      
+      for (const row of sampleData) {
+        if (row[8]) {
+          const corrected = await corregirTexto(row[8]);
+          textsToCorrect[row[8]] = corrected;
+        }
+        if (row[9]) {
+          const corrected = await corregirTexto(row[9]);
+          textsToCorrect[row[9]] = corrected;
+        }
+      }
+      
+      setCorrectedTexts(textsToCorrect);
+      
+      const summaryContent = `Reporte de ${selectedTenant || 'todos los tenants'} para ${selectedMonth || 'todos los meses'}. ` +
+                            `Total de visitas: ${data.length}. ` +
+                            `Problemas frecuentes: ${getFrequentIssues(data)}. ` +
+                            `Recomendaciones: Realizar mantenimiento preventivo.`;
+      
+      const summary = await resumirTexto(summaryContent);
+      setReportSummary(summary);
+      
+    } catch (error) {
+      console.error('Error procesando textos:', error);
+    } finally {
+      setIsProcessingText(false);
+    }
+  }, [selectedTenant, selectedMonth]);
+
+  useEffect(() => {
+    if (filteredData.length > 0) {
+      processReportTexts(filteredData);
+    }
+  }, [filteredData, processReportTexts]);
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
-    Papa.parse(file, {
-      complete: (result) => {
-        setCsvData(result.data.slice(1)); // Ignorar encabezados
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    
+    if (fileExtension === 'csv') {
+      Papa.parse(file, {
+        complete: (result) => {
+          setCsvData(result.data.slice(1));
+          setFileUploaded(true);
+        },
+        header: false,
+      });
+    } else if (fileExtension === 'xlsx') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        setCsvData(jsonData.slice(1));
         setFileUploaded(true);
-      },
-      header: false,
-    });
+      };
+      reader.readAsArrayBuffer(file);
+    } else {
+      alert('Por favor sube un archivo CSV o XLSX');
+    }
   };
 
   const handleGenerateReport = () => {
     if (!fileUploaded) {
-      alert('Por favor sube un archivo CSV primero');
+      alert('Por favor sube un archivo primero');
       return;
     }
 
@@ -112,73 +141,43 @@ const CreateReports = () => {
     ).join(', ');
   };
 
-  const getNextMonth = (currentMonth) => {
-    if (!currentMonth) return 'Próximo mes';
+  const getNextReviewDate = () => {
+    const today = new Date();
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     
-    const monthOrder = [
-      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
-    ];
+    while (nextMonth.getDay() !== 5) {
+      nextMonth.setDate(nextMonth.getDate() + 1);
+    }
     
-    const currentIndex = monthOrder.indexOf(currentMonth);
-    if (currentIndex === -1) return 'Próximo mes';
+    const day = nextMonth.getDate();
+    const month = nextMonth.getMonth() + 1;
     
-    const nextIndex = (currentIndex + 1) % 12;
-    return monthOrder[nextIndex];
+    return `${day} de ${monthsMap[month.toString()]}`;
   };
 
-  // Función para exportar a CSV
-  const exportToCSV = () => {
-    if (filteredData.length === 0) {
-      alert('No hay datos para exportar');
-      return;
-    }
-
-    const headers = [
-      'ID', 'Fecha', 'Hora', 'Usuario', 'Email', 'Teléfono', 
-      'Residencial', 'Tipo de Soporte', 'Descripción', 'Solución', 'Estado'
-    ];
-
-    const csvContent = [
-      headers,
-      ...filteredData
-    ].map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', `reporte_${selectedTenant || 'general'}_${selectedMonth || 'todos'}.csv`);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const getCurrentDate = () => {
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.getMonth() + 1;
+    const year = today.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
-  // Función para exportar a Excel
-  const exportToExcel = () => {
-    if (filteredData.length === 0) {
-      alert('No hay datos para exportar');
-      return;
-    }
-
-    const headers = [
-      'ID', 'Fecha', 'Hora', 'Usuario', 'Email', 'Teléfono', 
-      'Residencial', 'Tipo de Soporte', 'Descripción', 'Solución', 'Estado'
-    ];
-
-    const wsData = [
-      headers,
-      ...filteredData
-    ];
-
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
+  const extractStatus = (row) => {
+    const namePattern = /(Angel|Florian|Rodolfo|Cris|Alexis)/i;
+    const rowString = row.join(' ');
+    const nameMatch = rowString.match(namePattern);
     
-    XLSX.utils.book_append_sheet(wb, ws, 'Reporte');
-    XLSX.writeFile(wb, `reporte_${selectedTenant || 'general'}_${selectedMonth || 'todos'}.xlsx`);
+    if (nameMatch) {
+      const nameIndex = rowString.indexOf(nameMatch[0]);
+      const statusPart = rowString.substring(0, nameIndex).trim();
+      return statusPart || 'N/A';
+    }
+    return 'N/A';
+  };
+
+  const getCorrectedText = (originalText) => {
+    return correctedTexts[originalText] || originalText;
   };
 
   const downloadPdf = async () => {
@@ -191,7 +190,6 @@ const CreateReports = () => {
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       
-      // Configuración optimizada para html2canvas
       const options = {
         scale: 1,
         useCORS: true,
@@ -199,64 +197,53 @@ const CreateReports = () => {
         removeContainer: true,
         backgroundColor: '#ffffff',
         windowWidth: 900,
-        width: 900
+        width: 900,
+        onclone: (clonedDoc) => {
+          const bgElement = clonedDoc.querySelector('.background-image');
+          if (bgElement) {
+            bgElement.style.display = 'block';
+          }
+        }
       };
       
-      // Función para agregar una imagen al PDF
-      const addImageToPdf = async (element, isFirstPage = true) => {
-        const canvas = await html2canvas(element, options);
+      const contentHeight = reportRef.current.scrollHeight;
+      const maxContentHeightPerPage = 1000;
+      
+      if (contentHeight <= maxContentHeightPerPage) {
+        const canvas = await html2canvas(reportRef.current, options);
         const imgData = canvas.toDataURL('image/jpeg', 0.8);
-        
         const imgWidth = pageWidth - 20;
         const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        if (!isFirstPage) {
-          pdf.addPage();
-        }
-        
         pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
-        return imgHeight;
-      };
+      } else {
+        const sections = reportRef.current.querySelectorAll('.report-section');
+        let currentPosition = 0;
+        
+        const header = reportRef.current.querySelector('.report-header');
+        const headerCanvas = await html2canvas(header, options);
+        const headerImgData = headerCanvas.toDataURL('image/jpeg', 0.8);
+        const headerImgWidth = pageWidth - 20;
+        const headerImgHeight = (headerCanvas.height * headerImgWidth) / headerCanvas.width;
+        pdf.addImage(headerImgData, 'JPEG', 10, 10, headerImgWidth, headerImgHeight);
+        currentPosition = 10 + headerImgHeight;
+        
+        for (let i = 0; i < sections.length; i++) {
+          const section = sections[i];
+          const sectionCanvas = await html2canvas(section, options);
+          const sectionImgData = sectionCanvas.toDataURL('image/jpeg', 0.8);
+          const sectionImgWidth = pageWidth - 20;
+          const sectionImgHeight = (sectionCanvas.height * sectionImgWidth) / sectionCanvas.width;
+          
+          if (currentPosition + sectionImgHeight > pageHeight - 20) {
+            pdf.addPage();
+            currentPosition = 10;
+          }
+          
+          pdf.addImage(sectionImgData, 'JPEG', 10, currentPosition, sectionImgWidth, sectionImgHeight);
+          currentPosition += sectionImgHeight + 10;
+        }
+      }
       
-      // Dividir el contenido en 3 partes lógicas
-      const header = reportRef.current.querySelector('.report-header');
-      const section1 = reportRef.current.querySelector('.section-1');
-      const section2 = reportRef.current.querySelector('.section-2');
-      const section3 = reportRef.current.querySelector('.section-3');
-      const section4 = reportRef.current.querySelector('.section-4');
-      const footer = reportRef.current.querySelector('.report-footer');
-      
-      // Primera página: Encabezado + Sección 1
-      const tempDiv1 = document.createElement('div');
-      tempDiv1.style.width = '900px';
-      tempDiv1.style.background = 'white';
-      tempDiv1.appendChild(header.cloneNode(true));
-      tempDiv1.appendChild(section1.cloneNode(true));
-      document.body.appendChild(tempDiv1);
-      await addImageToPdf(tempDiv1, true);
-      document.body.removeChild(tempDiv1);
-      
-      // Segunda página: Sección 2 (tabla de visitas)
-      const tempDiv2 = document.createElement('div');
-      tempDiv2.style.width = '900px';
-      tempDiv2.style.background = 'white';
-      tempDiv2.appendChild(section2.cloneNode(true));
-      document.body.appendChild(tempDiv2);
-      await addImageToPdf(tempDiv2, false);
-      document.body.removeChild(tempDiv2);
-      
-      // Tercera página: Secciones 3 y 4 + footer
-      const tempDiv3 = document.createElement('div');
-      tempDiv3.style.width = '900px';
-      tempDiv3.style.background = 'white';
-      tempDiv3.appendChild(section3.cloneNode(true));
-      tempDiv3.appendChild(section4.cloneNode(true));
-      tempDiv3.appendChild(footer.cloneNode(true));
-      document.body.appendChild(tempDiv3);
-      await addImageToPdf(tempDiv3, false);
-      document.body.removeChild(tempDiv3);
-      
-      // Guardar el PDF
       pdf.save(`reporte_${selectedTenant || 'general'}_${selectedMonth || 'todos'}.pdf`);
       
     } catch (error) {
@@ -296,18 +283,30 @@ const CreateReports = () => {
                 onChange={(e) => setSelectedMonth(e.target.value)}
               >
                 <option value="">Todos los meses</option>
-                {months.map((month, index) => (
-                  <option key={index} value={month.value}>{month.label}</option>
+                {Object.entries(monthsMap).filter(([key]) => isNaN(key) || key.length > 2).map(([key, value]) => (
+                  <option key={key} value={value}>{value}</option>
                 ))}
               </select>
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Subir Archivo CSV</label>
+              <label className="form-label">¿Incluir próxima revisión?</label>
+              <select 
+                className="form-select" 
+                value={includeNextReview}
+                onChange={(e) => setIncludeNextReview(e.target.value === 'true')}
+              >
+                <option value="true">Sí</option>
+                <option value="false">No</option>
+              </select>
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Subir Archivo (CSV o Excel)</label>
               <input 
                 type="file" 
                 className="form-control" 
-                accept=".csv" 
+                accept=".csv,.xlsx,.xls" 
                 onChange={handleFileUpload} 
               />
             </div>
@@ -317,42 +316,30 @@ const CreateReports = () => {
                 type="button" 
                 className="btn btn-primary me-md-2"
                 onClick={handleGenerateReport}
-                disabled={isGeneratingPdf}
+                disabled={isGeneratingPdf || isProcessingText}
               >
                 Generar Reporte
               </button>
               
               {filteredData.length > 0 && (
-                <>
-                  <button 
-                    type="button" 
-                    className="btn btn-success me-md-2"
-                    onClick={downloadPdf}
-                    disabled={isGeneratingPdf}
-                  >
-                    {isGeneratingPdf ? 'Generando PDF...' : 'Descargar PDF'}
-                  </button>
-                  
-                  <button 
-                    type="button" 
-                    className="btn btn-secondary me-md-2"
-                    onClick={exportToCSV}
-                  >
-                    Exportar CSV
-                  </button>
-                  
-                  <button 
-                    type="button" 
-                    className="btn btn-info"
-                    onClick={exportToExcel}
-                  >
-                    Exportar Excel
-                  </button>
-                </>
+                <button 
+                  type="button" 
+                  className="btn btn-success"
+                  onClick={downloadPdf}
+                  disabled={isGeneratingPdf || isProcessingText}
+                >
+                  {isGeneratingPdf ? 'Generando PDF...' : 'Descargar Reporte PDF'}
+                </button>
               )}
             </div>
           </form>
         </div>
+
+        {isProcessingText && (
+          <div className="alert alert-info mt-4">
+            Procesando y mejorando el contenido del reporte...
+          </div>
+        )}
 
         {filteredData.length > 0 && (
           <div className="mt-4">
@@ -364,177 +351,244 @@ const CreateReports = () => {
                 margin: '0 auto',
                 boxShadow: '0px 0px 20px rgba(0, 0, 0, 0.1)',
                 borderRadius: '10px',
-                overflow: 'hidden'
+                overflow: 'hidden',
+                position: 'relative'
               }}
             >
-              {/* Encabezado del reporte */}
-              <div className="report-header">
-                <div style={{backgroundColor: '#005baa', height: '40px', width: '100%'}}></div>
-                
-                <div style={{padding: '30px 40px'}}>
-                  <div style={{textAlign: 'center', marginBottom: '30px'}}>
-                    <img 
-                      src="https://visitapp.la/images/logo-01.png" 
-                      alt="VisitApp Logo" 
-                      style={{width: '250px'}}
-                      crossOrigin="anonymous"
-                    />
+              <div className="background-image" style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundImage: 'url(/vi.png)',
+                backgroundSize: 'contain',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                opacity: 0.1,
+                zIndex: 0
+              }}></div>
+
+              <div style={{position: 'relative', zIndex: 1}}>
+                <div className="report-header">
+                  <div style={{backgroundColor: '#005baa', height: '40px', width: '100%'}}></div>
+                  
+                  <div style={{padding: '30px 40px'}}>
+                    <div style={{textAlign: 'center', marginBottom: '30px'}}>
+                      <img 
+                        src="/logo-01.png" 
+                        alt="VisitApp Logo" 
+                        style={{width: '250px'}}
+                      />
+                    </div>
+                    
+                    <h1 style={{color: '#003f7d', textAlign: 'center', marginBottom: '10px'}}>
+                      Reporte Mensual de Atención y Soporte
+                    </h1>
+                    
+                    {reportSummary && (
+                      <div style={{
+                        backgroundColor: '#f0f8ff',
+                        padding: '15px',
+                        borderRadius: '5px',
+                        marginBottom: '20px',
+                        borderLeft: '4px solid #005baa'
+                      }}>
+                        <p style={{fontStyle: 'italic', margin: 0}}>
+                          <strong>Resumen ejecutivo:</strong> {reportSummary}
+                        </p>
+                      </div>
+                    )}
+                    
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '20px'}}>
+                      <div>
+                        <p>
+                          <span style={{fontWeight: 'bold', color: '#005baa'}}>Residencial:</span> 
+                          {selectedTenant || 'Todos los residenciales'}
+                        </p>
+                        
+                        <p>
+                          <span style={{fontWeight: 'bold', color: '#005baa'}}>Periodo del Reporte:</span> 
+                          {selectedMonth || 'Todos los meses'}
+                        </p>
+                        
+                        <p>
+                          <span style={{fontWeight: 'bold', color: '#005baa'}}>Fecha de Creación:</span> 
+                          {getCurrentDate()}
+                        </p>
+                      </div>
+                      
+                      {includeNextReview && (
+                        <div>
+                          <p>
+                            <span style={{fontWeight: 'bold', color: '#005baa'}}>Próxima Revisión:</span> 
+                            {getNextReviewDate()}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  
-                  <h1 style={{color: '#003f7d', textAlign: 'center', marginBottom: '10px'}}>
-                    Reporte Mensual de Atención y Soporte
-                  </h1>
-                  
-                  <p>
-                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Residencial:</span> 
-                    {selectedTenant || 'Todos los residenciales'}
-                  </p>
-                  
-                  <p>
-                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Periodo del Reporte:</span> 
-                    {selectedMonth || 'Todos los meses'}
+                </div>
+
+                <div className="report-section" style={{padding: '0 40px'}}>
+                  <h2 style={{color: '#005baa', marginTop: '30px'}}>1. Resumen General</h2>
+                  <ul style={{paddingLeft: '20px'}}>
+                    <li>Total de Visitas o Soportes Realizados: {filteredData.length}</li>
+                    <li>Asuntos Resueltos: {
+                      filteredData.filter(row => {
+                        const status = extractStatus(row);
+                        return status.toLowerCase().includes('finalizado') || 
+                               status.toLowerCase().includes('resuelto') ||
+                               status.toLowerCase().includes('terminado');
+                      }).length
+                    }</li>
+                    <li>Asuntos Pendientes: {
+                      filteredData.filter(row => {
+                        const status = extractStatus(row);
+                        return status.toLowerCase().includes('pendiente') || 
+                               status.toLowerCase().includes('proceso');
+                      }).length
+                    }</li>
+                  </ul>
+                </div>
+
+                <div className="report-section" style={{padding: '0 40px 30px'}}>
+                  <h2 style={{color: '#005baa', marginTop: '30px'}}>2. Detalle de Visitas o Soportes</h2>
+                  <table style={{
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    marginTop: '10px',
+                    fontSize: '14px'
+                  }}>
+                    <thead>
+                      <tr>
+                        <th style={{
+                          backgroundColor: '#e0efff',
+                          color: '#003f7d',
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc'
+                        }}>Fecha</th>
+                        <th style={{
+                          backgroundColor: '#e0efff',
+                          color: '#003f7d',
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc'
+                        }}>Tipo de Soporte</th>
+                        <th style={{
+                          backgroundColor: '#e0efff',
+                          color: '#003f7d',
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc'
+                        }}>Descripción</th>
+                        <th style={{
+                          backgroundColor: '#e0efff',
+                          color: '#003f7d',
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc'
+                        }}>Solución</th>
+                        <th style={{
+                          backgroundColor: '#e0efff',
+                          color: '#003f7d',
+                          padding: '8px',
+                          textAlign: 'left',
+                          border: '1px solid #ccc'
+                        }}>Estado</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredData.map((row, index) => {
+                        const status = extractStatus(row);
+                        return (
+                          <tr key={index}>
+                            <td style={{
+                              padding: '8px',
+                              textAlign: 'left',
+                              border: '1px solid #ccc'
+                            }}>{row[1] || 'N/A'}</td>
+                            <td style={{
+                              padding: '8px',
+                              textAlign: 'left',
+                              border: '1px solid #ccc'
+                            }}>Soporte Técnico</td>
+                            <td style={{
+                              padding: '8px',
+                              textAlign: 'left',
+                              border: '1px solid #ccc',
+                              maxWidth: '200px',
+                              wordWrap: 'break-word'
+                            }}>{getCorrectedText(row[8]) || 'N/A'}</td>
+                            <td style={{
+                              padding: '8px',
+                              textAlign: 'left',
+                              border: '1px solid #ccc',
+                              maxWidth: '200px',
+                              wordWrap: 'break-word'
+                            }}>{getCorrectedText(row[9]) || 'N/A'}</td>
+                            <td style={{
+                              padding: '8px',
+                              textAlign: 'left',
+                              border: '1px solid #ccc'
+                            }}>{
+                              status.toLowerCase().includes('finalizado') ? 'Finalizado' :
+                              status.toLowerCase().includes('pendiente') ? 'Pendiente' :
+                              status.toLowerCase().includes('resuelto') ? 'Resuelto' :
+                              status.toLowerCase().includes('terminado') ? 'Finalizado' :
+                              status.toLowerCase().includes('proceso') ? 'Pendiente' :
+                              status || 'N/A'
+                            }</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="report-section" style={{padding: '0 40px 30px'}}>
+                  <h2 style={{color: '#005baa', marginTop: '30px'}}>3. Incidencias Frecuentes y Recomendaciones</h2>
+                  <ul style={{paddingLeft: '20px'}}>
+                    <li>
+                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Problemas Recurrentes:</span> 
+                      {getFrequentIssues(filteredData)}
+                    </li>
+                    <li>
+                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Recomendaciones:</span> 
+                      Realizar mantenimiento preventivo periódico y actualizar los sistemas regularmente.
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="report-section" style={{padding: '0 40px 30px'}}>
+                  <h2 style={{color: '#005baa', marginTop: '30px'}}>4. Siguientes Pasos</h2>
+                  <ul style={{paddingLeft: '20px'}}>
+                    <li>
+                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Plan de Mantenimiento Preventivo:</span> 
+                      Monitoreo continuo de parte de VisitApp
+                    </li>
+                    {includeNextReview && (
+                      <li>
+                        <span style={{fontWeight: 'bold', color: '#005baa'}}>Próxima Revisión:</span> 
+                        {getNextReviewDate()}
+                      </li>
+                    )}
+                    <li>
+                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Acciones Pendientes por Confirmar:</span> 
+                      Seguimiento a casos en proceso
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="report-section" style={{padding: '0 40px 30px'}}>
+                  <p style={{marginTop: '30px'}}>
+                    Continuamos trabajando para garantizar la mejor experiencia y mantener un alto nivel de satisfacción entre nuestros clientes.
                   </p>
                 </div>
-              </div>
 
-              {/* Sección 1: Resumen General */}
-              <div className="section-1 report-section" style={{padding: '0 40px'}}>
-                <h2 style={{color: '#005baa', marginTop: '30px'}}>1. Resumen General</h2>
-                <ul style={{paddingLeft: '20px'}}>
-                  <li>Total de Visitas o Soportes Realizados: {filteredData.length}</li>
-                  <li>Asuntos Resueltos: {filteredData.filter(row => row[10]?.toLowerCase().includes('resuelto')).length}</li>
-                  <li>Asuntos Pendientes o en Proceso: {filteredData.filter(row => row[10]?.toLowerCase().includes('proceso')).length}</li>
-                </ul>
+                <div style={{backgroundColor: '#005baa', height: '40px', width: '100%'}}></div>
               </div>
-
-              {/* Sección 2: Detalle de Visitas */}
-              <div className="section-2 report-section" style={{padding: '0 40px 30px'}}>
-                <h2 style={{color: '#005baa', marginTop: '30px'}}>2. Detalle de Visitas o Soportes</h2>
-                <table style={{
-                  width: '100%',
-                  borderCollapse: 'collapse',
-                  marginTop: '10px',
-                  fontSize: '14px'
-                }}>
-                  <thead>
-                    <tr>
-                      <th style={{
-                        backgroundColor: '#e0efff',
-                        color: '#003f7d',
-                        padding: '8px',
-                        textAlign: 'left',
-                        border: '1px solid #ccc'
-                      }}>Fecha</th>
-                      <th style={{
-                        backgroundColor: '#e0efff',
-                        color: '#003f7d',
-                        padding: '8px',
-                        textAlign: 'left',
-                        border: '1px solid #ccc'
-                      }}>Tipo de Soporte</th>
-                      <th style={{
-                        backgroundColor: '#e0efff',
-                        color: '#003f7d',
-                        padding: '8px',
-                        textAlign: 'left',
-                        border: '1px solid #ccc'
-                      }}>Descripción</th>
-                      <th style={{
-                        backgroundColor: '#e0efff',
-                        color: '#003f7d',
-                        padding: '8px',
-                        textAlign: 'left',
-                        border: '1px solid #ccc'
-                      }}>Solución</th>
-                      <th style={{
-                        backgroundColor: '#e0efff',
-                        color: '#003f7d',
-                        padding: '8px',
-                        textAlign: 'left',
-                        border: '1px solid #ccc'
-                      }}>Estado</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredData.map((row, index) => (
-                      <tr key={index}>
-                        <td style={{
-                          padding: '8px',
-                          textAlign: 'left',
-                          border: '1px solid #ccc'
-                        }}>{row[1] || 'N/A'}</td>
-                        <td style={{
-                          padding: '8px',
-                          textAlign: 'left',
-                          border: '1px solid #ccc'
-                        }}>{row[7] || 'N/A'}</td>
-                        <td style={{
-                          padding: '8px',
-                          textAlign: 'left',
-                          border: '1px solid #ccc',
-                          maxWidth: '200px',
-                          wordWrap: 'break-word'
-                        }}>{row[8] || 'N/A'}</td>
-                        <td style={{
-                          padding: '8px',
-                          textAlign: 'left',
-                          border: '1px solid #ccc',
-                          maxWidth: '200px',
-                          wordWrap: 'break-word'
-                        }}>{row[9] || 'N/A'}</td>
-                        <td style={{
-                          padding: '8px',
-                          textAlign: 'left',
-                          border: '1px solid #ccc'
-                        }}>{row[10] || 'N/A'}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              {/* Sección 3: Incidencias */}
-              <div className="section-3 report-section" style={{padding: '0 40px 30px'}}>
-                <h2 style={{color: '#005baa', marginTop: '30px'}}>3. Incidencias Frecuentes y Recomendaciones</h2>
-                <ul style={{paddingLeft: '20px'}}>
-                  <li>
-                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Problemas Recurrentes:</span> 
-                    {getFrequentIssues(filteredData)}
-                  </li>
-                  <li>
-                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Recomendaciones:</span> 
-                    Realizar mantenimiento preventivo periódico y actualizar los sistemas regularmente.
-                  </li>
-                </ul>
-              </div>
-
-              {/* Sección 4: Siguientes pasos */}
-              <div className="section-4 report-section" style={{padding: '0 40px 30px'}}>
-                <h2 style={{color: '#005baa', marginTop: '30px'}}>4. Siguientes Pasos</h2>
-                <ul style={{paddingLeft: '20px'}}>
-                  <li>
-                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Plan de Mantenimiento Preventivo:</span> 
-                    Monitoreo continuo de parte de VisitApp
-                  </li>
-                  <li>
-                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Próxima Revisión:</span> 
-                    {getNextMonth(selectedMonth)}
-                  </li>
-                  <li>
-                    <span style={{fontWeight: 'bold', color: '#005baa'}}>Acciones Pendientes por Confirmar:</span> 
-                    Seguimiento a casos en proceso
-                  </li>
-                </ul>
-              </div>
-
-              {/* Pie del reporte */}
-              <div className="report-footer" style={{padding: '0 40px 30px'}}>
-                <p style={{marginTop: '30px'}}>
-                  Continuamos trabajando para garantizar la mejor experiencia y mantener un alto nivel de satisfacción entre nuestros clientes.
-                </p>
-              </div>
-
-              <div style={{backgroundColor: '#005baa', height: '40px', width: '100%'}}></div>
             </div>
           </div>
         )}
