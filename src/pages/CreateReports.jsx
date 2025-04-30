@@ -7,7 +7,6 @@ import { jsPDF } from 'jspdf';
 import * as XLSX from 'xlsx';
 import tenants from '../constants/tenants';
 import monthsMap from '../constants/monthsMap';
-import '../utils/dateUtils.js';
 import { corregirTexto, resumirTexto } from '../service/textProcessor.js';
 
 const CreateReports = () => {
@@ -385,21 +384,6 @@ const CreateReports = () => {
                     <h1 style={{color: '#003f7d', textAlign: 'center', marginBottom: '10px'}}>
                       Reporte Mensual de Atención y Soporte
                     </h1>
-                    
-                    {reportSummary && (
-                      <div style={{
-                        backgroundColor: '#f0f8ff',
-                        padding: '15px',
-                        borderRadius: '5px',
-                        marginBottom: '20px',
-                        borderLeft: '4px solid #005baa'
-                      }}>
-                        <p style={{fontStyle: 'italic', margin: 0}}>
-                          <strong>Resumen ejecutivo:</strong> {reportSummary}
-                        </p>
-                      </div>
-                    )}
-                    
                     <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '20px'}}>
                       <div>
                         <p>
@@ -547,11 +531,15 @@ const CreateReports = () => {
                   </table>
                 </div>
 
-                <div className="report-section" style={{padding: '0 40px 30px'}}>
-                  <h2 style={{color: '#005baa', marginTop: '30px'}}>3. Incidencias Frecuentes y Recomendaciones</h2>
-                  <ul style={{paddingLeft: '20px'}}>
-                    <li>
-                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Problemas Recurrentes:</span> 
+              <div className="report-section" style={{padding: '0 40px 30px'}}>
+  <h2 style={{color: '#005baa', marginTop: '30px'}}>3. Incidencias Frecuentes y Recomendaciones</h2>
+  <ul style={{paddingLeft: '20px'}}>
+    <li>
+      <span style={{fontWeight: 'bold', color: '#005baa'}}>Problemas Recurrentes:</span> 
+      {getFrequentIssues(filteredData)}
+      <p style={{fontStyle: 'italic', margin: '10px 0 0 0'}}>
+        <strong>Resumen ejecutivo:</strong> {reportSummary}
+                        </p>
                       {getFrequentIssues(filteredData)}
                     </li>
                     <li>
@@ -566,8 +554,7 @@ const CreateReports = () => {
                   <ul style={{paddingLeft: '20px'}}>
                     <li>
                       <span style={{fontWeight: 'bold', color: '#005baa'}}>Plan de Mantenimiento Preventivo:</span> 
-                      Monitoreo continuo de parte de VisitApp
-                    </li>
+Monitoreo continuo de parte de VisitApp  del residencial para asegurar un óptimo funcionamiento                    </li>
                     {includeNextReview && (
                       <li>
                         <span style={{fontWeight: 'bold', color: '#005baa'}}>Próxima Revisión:</span> 

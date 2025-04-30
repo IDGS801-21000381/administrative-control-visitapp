@@ -1,5 +1,15 @@
 // src/services/textProcessor.js
 
+export const cleanText = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/(\d+\sveces\))/g, '') // Elimina "(X veces)"
+    .replace(/[^\w\sáéíóúñÁÉÍÓÚÑ.,¡!¿?]/gi, '') // Mantiene caracteres básicos en español
+    .replace(/\s+/g, ' ') // Elimina espacios múltiples
+    .trim();
+};
+
+
 // Función para corregir el texto hasta que esté bien corregido
 export async function corregirTexto(textoOriginal) {
   const MAX_PASADAS = 10; // Limite de iteraciones para evitar bucles infinitos
@@ -46,19 +56,30 @@ export async function corregirTexto(textoOriginal) {
   return texto;
 }
 
-// Función para resumir el texto de manera más coherente
+// Función corregida para resumir texto
 export async function resumirTexto(texto) {
-  const response = await fetch("https://api-inference.huggingface.co/models/facebook/bart-large-cnn", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      // Puede agregar 'Authorization' si el modelo requiere token
-    },
-    body: JSON.stringify({
-      inputs: texto,
-    }),
-  });
+  try {
+    const response = await fetch("https://api-inference.huggingface.co/models/ESGBERT/summarization-spanish", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer TU_API_KEY" // Necesitarás una API key de HuggingFace
+      },
+      body: JSON.stringify({
+        inputs: texto,
+        parameters: {
+          max_length: 130,
+          min_length: 30
+        }
+      }),
+    });
 
-  const data = await response.json();
-  return data[0]?.summary_text || "No se pudo resumir el texto.";
+    if (!response.ok) throw new Error("Error en la API");
+    
+    const data = await response.json();
+    return data[0]?.summary_text || texto; // Devuelve el texto original si falla
+  } catch (error) {
+    console.error("Error al resumir:", error);
+    return texto; // Fallback al texto original
+  }
 }
