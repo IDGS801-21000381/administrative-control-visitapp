@@ -201,3 +201,49 @@
     margin-top: 20px;
   }
 }
+/*
+.editable-field {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  width: 100%;
+  margin-top: 5px;
+  font-family: inherit;
+  font-size: inherit;
+  background: #fff;
+}
+
+.editable-field:focus {
+  outline: none;
+  border-color: #005baa;
+  box-shadow: 0 0 0 2px rgba(0, 91, 170, 0.25);
+}
+*/
+/* Client.css */
+.report-preview {
+  max-height: 80vh;
+  overflow-y: auto;
+  margin: 20px 0;
+  padding: 10px;
+}
+
+.editable-field {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  width: 100%;
+  margin-top: 5px;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.validated-text {
+  display: none;
+  white-space: pre-wrap;
+  padding: 8px;
+  border: 1px solid transparent;
+}
+
+.report-section {
+  page-break-inside: avoid;
+}

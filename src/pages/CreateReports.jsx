@@ -20,13 +20,23 @@ const CreateReports = () => {
   const [isProcessingText, setIsProcessingText] = useState(false);
   const [reportSummary, setReportSummary] = useState('');
   const [correctedTexts, setCorrectedTexts] = useState({});
+  
+  // Estados para contenido editable y validado
+  const [editableFrequentIssues, setEditableFrequentIssues] = useState('');
+  const [editableRecommendations, setEditableRecommendations] = useState('');
+  const [editablePreventivePlan, setEditablePreventivePlan] = useState('');
+  const [validatedContent, setValidatedContent] = useState({
+    frequentIssues: '',
+    recommendations: '',
+    preventivePlan: ''
+  });
+
   const reportRef = useRef();
 
   const processReportTexts = useCallback(async (data) => {
     setIsProcessingText(true);
     try {
       const textsToCorrect = {};
-      
       const sampleData = data.slice(0, 5);
       
       for (const row of sampleData) {
@@ -123,6 +133,9 @@ const CreateReports = () => {
     }
 
     setFilteredData(filtered);
+    setEditableFrequentIssues(getFrequentIssues(filtered));
+    setEditableRecommendations('Realizar mantenimiento preventivo periódico y actualizar los sistemas regularmente.');
+    setEditablePreventivePlan('Monitoreo continuo de parte de VisitApp');
   };
 
   const getFrequentIssues = (data) => {
@@ -179,72 +192,61 @@ const CreateReports = () => {
     return correctedTexts[originalText] || originalText;
   };
 
+  const validateContent = async () => {
+    try {
+      const correctedFrequent = await corregirTexto(editableFrequentIssues);
+      const correctedRecommendations = await corregirTexto(editableRecommendations);
+      const correctedPreventive = await corregirTexto(editablePreventivePlan);
+
+      setValidatedContent({
+        frequentIssues: correctedFrequent,
+        recommendations: correctedRecommendations,
+        preventivePlan: correctedPreventive
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error validando contenido:', error);
+      alert('Error al validar el contenido. Verifica la conexión e intenta nuevamente.');
+      return false;
+    }
+  };
+
   const downloadPdf = async () => {
     if (!reportRef.current || filteredData.length === 0) return;
     
+    const isValid = await validateContent();
+    if (!isValid) return;
+
     setIsGeneratingPdf(true);
     
     try {
       const pdf = new jsPDF('p', 'mm', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
       const options = {
         scale: 1,
         useCORS: true,
         logging: false,
-        removeContainer: true,
         backgroundColor: '#ffffff',
         windowWidth: 900,
         width: 900,
         onclone: (clonedDoc) => {
-          const bgElement = clonedDoc.querySelector('.background-image');
-          if (bgElement) {
-            bgElement.style.display = 'block';
-          }
+          clonedDoc.querySelectorAll('.editable-field').forEach(element => {
+            element.style.display = 'none';
+          });
+          clonedDoc.querySelectorAll('.validated-text').forEach(element => {
+            element.style.display = 'block';
+          });
         }
       };
+
+      const canvas = await html2canvas(reportRef.current, options);
+      const imgData = canvas.toDataURL('image/jpeg', 0.9);
+      const imgWidth = pdf.internal.pageSize.getWidth() - 20;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
       
-      const contentHeight = reportRef.current.scrollHeight;
-      const maxContentHeightPerPage = 1000;
-      
-      if (contentHeight <= maxContentHeightPerPage) {
-        const canvas = await html2canvas(reportRef.current, options);
-        const imgData = canvas.toDataURL('image/jpeg', 0.8);
-        const imgWidth = pageWidth - 20;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
-      } else {
-        const sections = reportRef.current.querySelectorAll('.report-section');
-        let currentPosition = 0;
-        
-        const header = reportRef.current.querySelector('.report-header');
-        const headerCanvas = await html2canvas(header, options);
-        const headerImgData = headerCanvas.toDataURL('image/jpeg', 0.8);
-        const headerImgWidth = pageWidth - 20;
-        const headerImgHeight = (headerCanvas.height * headerImgWidth) / headerCanvas.width;
-        pdf.addImage(headerImgData, 'JPEG', 10, 10, headerImgWidth, headerImgHeight);
-        currentPosition = 10 + headerImgHeight;
-        
-        for (let i = 0; i < sections.length; i++) {
-          const section = sections[i];
-          const sectionCanvas = await html2canvas(section, options);
-          const sectionImgData = sectionCanvas.toDataURL('image/jpeg', 0.8);
-          const sectionImgWidth = pageWidth - 20;
-          const sectionImgHeight = (sectionCanvas.height * sectionImgWidth) / sectionCanvas.width;
-          
-          if (currentPosition + sectionImgHeight > pageHeight - 20) {
-            pdf.addPage();
-            currentPosition = 10;
-          }
-          
-          pdf.addImage(sectionImgData, 'JPEG', 10, currentPosition, sectionImgWidth, sectionImgHeight);
-          currentPosition += sectionImgHeight + 10;
-        }
-      }
-      
+      pdf.addImage(imgData, 'JPEG', 10, 10, imgWidth, imgHeight);
       pdf.save(`reporte_${selectedTenant || 'general'}_${selectedMonth || 'todos'}.pdf`);
-      
+
     } catch (error) {
       console.error('Error al generar PDF:', error);
       alert('Ocurrió un error al generar el PDF. Por favor intenta nuevamente.');
@@ -327,7 +329,7 @@ const CreateReports = () => {
                   onClick={downloadPdf}
                   disabled={isGeneratingPdf || isProcessingText}
                 >
-                  {isGeneratingPdf ? 'Generando PDF...' : 'Descargar Reporte PDF'}
+                  {isGeneratingPdf ? 'Generando PDF...' : 'Descargar PDF'}
                 </button>
               )}
             </div>
@@ -341,7 +343,7 @@ const CreateReports = () => {
         )}
 
         {filteredData.length > 0 && (
-          <div className="mt-4">
+          <div className="mt-4 report-preview">
             <div 
               ref={reportRef} 
               style={{
@@ -531,20 +533,32 @@ const CreateReports = () => {
                   </table>
                 </div>
 
-              <div className="report-section" style={{padding: '0 40px 30px'}}>
-  <h2 style={{color: '#005baa', marginTop: '30px'}}>3. Incidencias Frecuentes y Recomendaciones</h2>
-  <ul style={{paddingLeft: '20px'}}>
-    <li>
-      <span style={{fontWeight: 'bold', color: '#005baa'}}>Problemas Recurrentes:</span> 
-      {getFrequentIssues(filteredData)}
-      <p style={{fontStyle: 'italic', margin: '10px 0 0 0'}}>
-        <strong>Resumen ejecutivo:</strong> {reportSummary}
-                        </p>
-                      {getFrequentIssues(filteredData)}
+                <div className="report-section" style={{padding: '0 40px 30px'}}>
+                  <h2 style={{color: '#005baa', marginTop: '30px'}}>3. Incidencias Frecuentes y Recomendaciones</h2>
+                  <ul style={{paddingLeft: '20px'}}>
+                    <li>
+                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Problemas Recurrentes:</span>
+                      <textarea
+                        value={editableFrequentIssues}
+                        onChange={(e) => setEditableFrequentIssues(e.target.value)}
+                        className="editable-field"
+                        style={{marginTop: '5px'}}
+                      />
+                      <div className="validated-text" style={{display: 'none'}}>
+                        {validatedContent.frequentIssues}
+                      </div>
                     </li>
                     <li>
-                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Recomendaciones:</span> 
-                      Realizar mantenimiento preventivo periódico y actualizar los sistemas regularmente.
+                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Recomendaciones:</span>
+                      <textarea
+                        value={editableRecommendations}
+                        onChange={(e) => setEditableRecommendations(e.target.value)}
+                        className="editable-field"
+                        style={{marginTop: '5px'}}
+                      />
+                      <div className="validated-text" style={{display: 'none'}}>
+                        {validatedContent.recommendations}
+                      </div>
                     </li>
                   </ul>
                 </div>
@@ -553,25 +567,25 @@ const CreateReports = () => {
                   <h2 style={{color: '#005baa', marginTop: '30px'}}>4. Siguientes Pasos</h2>
                   <ul style={{paddingLeft: '20px'}}>
                     <li>
-                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Plan de Mantenimiento Preventivo:</span> 
-Monitoreo continuo de parte de VisitApp  del residencial para asegurar un óptimo funcionamiento                    </li>
-                    {includeNextReview && (
-                      <li>
-                        <span style={{fontWeight: 'bold', color: '#005baa'}}>Próxima Revisión:</span> 
-                        {getNextReviewDate()}
-                      </li>
-                    )}
+                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Plan de Mantenimiento Preventivo:</span>
+                      <input
+                        type="text"
+                        value={editablePreventivePlan}
+                        onChange={(e) => setEditablePreventivePlan(e.target.value)}
+                        className="editable-field"
+                        style={{marginTop: '5px'}}
+                      />
+                      <div className="validated-text" style={{display: 'none'}}>
+                        {validatedContent.preventivePlan}
+                      </div>
+                    </li>
                     <li>
-                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Acciones Pendientes por Confirmar:</span> 
-                      Seguimiento a casos en proceso
+                      <span style={{fontWeight: 'bold', color: '#005baa'}}>Acciones Pendientes por Confirmar:</span>
+                      <div style={{marginTop: '5px'}}>
+                        Continuaremos trabajando para garantizar la mejor experiencia y mantener un alto nivel de satisfacción entre nuestros clientes.
+                      </div>
                     </li>
                   </ul>
-                </div>
-
-                <div className="report-section" style={{padding: '0 40px 30px'}}>
-                  <p style={{marginTop: '30px'}}>
-                    Continuamos trabajando para garantizar la mejor experiencia y mantener un alto nivel de satisfacción entre nuestros clientes.
-                  </p>
                 </div>
 
                 <div style={{backgroundColor: '#005baa', height: '40px', width: '100%'}}></div>
